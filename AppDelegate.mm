@@ -27,7 +27,7 @@ int64_t nrow_loaded; // number of loaded rows
 //----------------------------------------------------------------------------
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
 {
-  return YES;
+  return NO;
 }
 
 //----------------------------------------------------------------------------
@@ -146,6 +146,10 @@ int64_t nrow_loaded; // number of loaded rows
 {
   BOOL isFirstMachOView = [self isOnlyRunningMachOView];
   
+// disable the state resume feature, it's not very useful with MachOView
+  if([[NSUserDefaults standardUserDefaults] objectForKey: @"ApplePersistenceIgnoreState"] == nil)
+      [[NSUserDefaults standardUserDefaults] setBool: YES forKey:@"ApplePersistenceIgnoreState"];
+
   NSFileManager * fileManager = [NSFileManager defaultManager];
   NSString * tempDir = [MVDocument temporaryDirectory];
   

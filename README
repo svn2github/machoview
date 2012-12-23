@@ -4,6 +4,9 @@ Hungry Apple icons by Nicholas Boyd (http://loafninja.deviantart.com)
 todo:
 - code sections parsing on demand
 
+ver 2.3.8370
+- merge changes from fG!
+
 ver 2.3.8345
 - Transition to ARC (but targeting OS X 10.6 for compatibility)
 - FAT binary layout in details
