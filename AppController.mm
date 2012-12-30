@@ -1,5 +1,5 @@
-/*
- *  AppDelegate.mm
+ /*
+ *  AppController.mm
  *  MachOView
  *
  *  Created by psaghelyi on 15/06/2010.
@@ -7,16 +7,17 @@
  */
 
 #import "Common.h"
-#import "AppDelegate.h"
+#import "AppController.h"
 #import "DataController.h"
 #import "Document.h"
+#import "PreferenceController.h"
 
 // counters for statistics
 int64_t nrow_total;  // number of rows (loaded and empty)
 int64_t nrow_loaded; // number of loaded rows
 
 //============================================================================
-@implementation AppDelegate
+@implementation MVAppController
 
 //----------------------------------------------------------------------------
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
@@ -236,6 +237,16 @@ int64_t nrow_loaded; // number of loaded rows
     NSLog(@"stat: %lld/%lld rows in memory\n",nrow_loaded,nrow_total);
     [NSThread sleepForTimeInterval:1];
   }
+}
+
+//----------------------------------------------------------------------------
+- (IBAction)showPreferencePanel:(id)sender
+{
+    if (!preferenceController)
+    {
+        preferenceController = [[MVPreferenceController alloc] init];
+    }
+    [preferenceController showWindow:self];
 }
 
 @end
