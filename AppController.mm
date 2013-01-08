@@ -147,10 +147,15 @@ int64_t nrow_loaded; // number of loaded rows
 {
   BOOL isFirstMachOView = [self isOnlyRunningMachOView];
   
-// disable the state resume feature, it's not very useful with MachOView
+  // disable the state resume feature, it's not very useful with MachOView
   if([[NSUserDefaults standardUserDefaults] objectForKey: @"ApplePersistenceIgnoreState"] == nil)
       [[NSUserDefaults standardUserDefaults] setBool: YES forKey:@"ApplePersistenceIgnoreState"];
 
+  // load user's defaults for preferences
+  if([[NSUserDefaults standardUserDefaults] objectForKey: @"UseLLVMDisassembler"] != nil)
+    qflag = [[NSUserDefaults standardUserDefaults] boolForKey:@"UseLLVMDisassembler"];
+
+  
   NSFileManager * fileManager = [NSFileManager defaultManager];
   NSString * tempDir = [MVDocument temporaryDirectory];
   

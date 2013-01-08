@@ -12,7 +12,7 @@
 
 @interface MVAppController : NSObject <NSApplicationDelegate,NSOpenSavePanelDelegate>
 {
-    MVPreferenceController * preferenceController;
+  MVPreferenceController * preferenceController;
 }
 
 - (IBAction)showPreferencePanel:(id)sender;

@@ -6,9 +6,13 @@
  *
  */
 
+#include "disasm.h"
+
 @interface MVPreferenceController: NSWindowController
 {
+  IBOutlet NSButton *   useLLVMDisassembler;
 }
 
+- (IBAction)toggleUseLLVMDisassembler:(id)sender;
 
 @end

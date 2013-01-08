@@ -4,8 +4,18 @@ Hungry Apple icons by Nicholas Boyd (http://loafninja.deviantart.com)
 todo:
 - code sections parsing on demand
 
+ver 2.3.8505
+- updated disassembler (LLVM included for testing)
+- some GUI improvements (PreferencePanel)
+- transitions to __weak references instead of __unsafe_retain
+- SDK 10.8 / deploy 10.7
+- crash fix for disassembling encrypted ARM text sections
+
 ver 2.3.8370
 - merge changes from fG!
+  -- do not reopen unclosed binaries
+  -- some new Load Commands
+  -- bugfixes
 
 ver 2.3.8345
 - Transition to ARC (but targeting OS X 10.6 for compatibility)

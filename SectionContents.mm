@@ -572,25 +572,35 @@ static AsmFootPrint const fastStubHelperHelperARM =
     }
   }
   
-  char *                    ot_sect = (char*)[dataController.fileData bytes] + location;
-  uint32_t                  ot_left = length;
-  uint64_t                  ot_addr = ([self is64bit] == NO ? [self fileOffsetToRVA:location] : [self fileOffsetToRVA64:location]);
-  uint64_t                  ot_sect_addr = ot_addr;
-  enum byte_sex             ot_object_byte_sex = LITTLE_ENDIAN_BYTE_SEX; // the only one we support so far
-  struct nlist *            ot_symbols = (symbols.empty() ? NULL : const_cast<struct nlist *>(symbols[0]));
-  struct nlist_64 *         ot_symbols64 = (symbols_64.empty() ? NULL : const_cast<struct nlist_64 *>(symbols_64[0]));
-  uint32_t                  ot_nsymbols = ([self is64bit] == NO ? symbols.size() : symbols_64.size());
-  char *                    ot_strings = const_cast<char *>(strtab);
-  uint32_t                  ot_strings_size = (char *)[dataController.fileData bytes] - strtab;
-  uint32_t *                ot_indirect_symbols = (dysymtab_command ? (uint32_t*)((char*)[dataController.fileData bytes] + dysymtab_command->indirectsymoff + imageOffset) : NULL);
-  uint32_t                  ot_nindirect_symbols = (dysymtab_command ? dysymtab_command->nindirectsyms : 0);
-  struct load_command *     ot_load_commands = const_cast<struct load_command *>(commands[0]);
-  uint32_t                  ot_ncmds = commands.size();
-  uint32_t                  ot_sizeofcmds = mach_header->sizeofcmds;
-  cpu_type_t                ot_cputype = mach_header->cputype;
-  cpu_subtype_t             ot_cpu_subtype = mach_header->cpusubtype;
-  bool                      ot_verbose = true;
-  bool                      ot_llvm_mc = false;
+  char *                      ot_sect = (char *)[dataController.fileData bytes] + location;
+  uint32_t                    ot_left = length;
+  uint64_t                    ot_addr = ([self is64bit] == NO ? [self fileOffsetToRVA:location] : [self fileOffsetToRVA64:location]);
+  uint64_t                    ot_sect_addr = ot_addr;
+  enum byte_sex               ot_object_byte_sex = LITTLE_ENDIAN_BYTE_SEX; // the only one we support so far
+  struct nlist *              ot_symbols = (symbols.empty() ? NULL : const_cast<struct nlist *>(symbols[0]));
+  struct nlist_64 *           ot_symbols64 = (symbols_64.empty() ? NULL : const_cast<struct nlist_64 *>(symbols_64[0]));
+  uint32_t                    ot_nsymbols = ([self is64bit] == NO ? symbols.size() : symbols_64.size());
+  char *                      ot_strings = (char *)strtab;
+  uint32_t                    ot_strings_size = (char *)[dataController.fileData bytes] - strtab;
+  uint32_t *                  ot_indirect_symbols = (dysymtab_command ? (uint32_t*)((char*)[dataController.fileData bytes] + dysymtab_command->indirectsymoff + imageOffset) : NULL);
+  uint32_t                    ot_nindirect_symbols = (dysymtab_command ? dysymtab_command->nindirectsyms : 0);
+  struct load_command *       ot_load_commands = (struct load_command *)(commands[0]);
+  uint32_t                    ot_ncmds = commands.size();
+  uint32_t                    ot_sizeofcmds = mach_header->sizeofcmds;
+  cpu_type_t                  ot_cputype = mach_header->cputype;
+  cpu_subtype_t               ot_cpu_subtype = mach_header->cpusubtype;
+  bool                        ot_verbose = true;
+  bool                        ot_llvm_mc = false;
+
+  struct data_in_code_entry * ot_dices = NULL; // TODO
+  uint32_t                    ot_ndices = 0; // TODO
+  char *                      ot_object_addr = (char *)mach_header;
+  uint32_t                    ot_object_size = imageSize;
+
+  LLVMDisasmContextRef        ot_arm_dc = (qflag && mach_header->cputype == CPU_TYPE_ARM ? create_arm_llvm_disassembler() : NULL);
+  LLVMDisasmContextRef        ot_thumb_dc = (qflag && mach_header->cputype == CPU_TYPE_ARM ? create_thumb_llvm_disassembler() : NULL);
+  LLVMDisasmContextRef        ot_i386_dc = (qflag && mach_header->cputype == CPU_TYPE_I386 ? create_i386_llvm_disassembler() : NULL);
+  LLVMDisasmContextRef        ot_x86_64_dc = (qflag && mach_header->cputype == CPU_TYPE_X86_64 ? create_x86_64_llvm_disassembler() : NULL);
   
   vector<symbol> sorted_symbols;
   set<uint64_t> thumbSymbols;
@@ -663,7 +673,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
   //===========================================================================
 
   do {
-
+    
     // catch thread cancellation request
     if ([backgroundThread isCancelled])
     {
@@ -678,7 +688,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
     }
     
     int pfdout[3]; // 0:read 1:write 2:stdout
-    if (pipe (pfdout) != 0) 
+    if (pipe (pfdout) != 0)
     {
       [NSException raise:@"pipe" format:@"unable to create pipes"];
     }
@@ -689,14 +699,19 @@ static AsmFootPrint const fastStubHelperHelperARM =
     // redirect
     close(STDOUT_FILENO);
     dup2 (pfdout[1], STDOUT_FILENO);
-  
+    
     // run disassembler line by line
     setlinebuf(stdout);
     
     NSUInteger nAsmLine = 0;
     do
     {
-      uint32_t parsed_bytes = 
+      uint32_t parsed_bytes;
+      
+      try
+      {
+        
+        parsed_bytes =
         (mach_header->cputype != CPU_TYPE_ARM
          ? i386_disassemble(
                             ot_sect,
@@ -720,7 +735,11 @@ static AsmFootPrint const fastStubHelperHelperARM =
                             ot_ncmds,
                             ot_sizeofcmds,
                             ot_verbose,
-                            ot_llvm_mc
+                            ot_llvm_mc,
+                            ot_i386_dc,
+                            ot_x86_64_dc,
+                            ot_object_addr,
+                            ot_object_size
                             )
          : arm_disassemble(
                            ot_sect,
@@ -742,10 +761,22 @@ static AsmFootPrint const fastStubHelperHelperARM =
                            ot_ncmds,
                            ot_sizeofcmds,
                            ot_cpu_subtype,
-                           ot_verbose
+                           ot_verbose,
+                           ot_arm_dc,
+                           ot_thumb_dc,
+                           ot_object_addr,
+                           ot_object_size,
+                           ot_dices,
+                           ot_ndices
                            )
-       );
-        
+         );
+      }
+      catch(...)
+      {
+        // sometimes the disassembler crashes on encrypted test section
+        break;
+      }
+      
       // read from pipe
       char buf[0x1000], *pbuf = buf;
       ssize_t lenbuf = read(pfdout[0], buf, sizeof(buf));
@@ -770,17 +801,17 @@ static AsmFootPrint const fastStubHelperHelperARM =
               [node.details setAttributesFromRowIndex:bookmark:MVMetaDataAttributeName,symbolName,nil];
               [node.details setAttributes:MVUnderlineAttributeName,@"YES",nil];
             }
-
+            
             // start new block
             bookmark = node.details.rowCount;
             [node.details appendRow:@""
                                    :@""
                                    :[NSString stringWithFormat:@"%@:", (symbolName = NSSTRING(symbol_name))]
                                    :@""];
-                
+            
             [node.details setAttributes:MVCellColorAttributeName,[NSColor orangeColor],nil];
           }
-              
+          
           // print one line of asm
           uint32_t fileOffset = ([self is64bit] == NO ? [self RVAToFileOffset:(uint32_t)ot_addr] : [self RVA64ToFileOffset:ot_addr]);
           NSRange range = NSMakeRange(fileOffset,0);
@@ -790,7 +821,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
                                  :lastReadHex
                                  :NSSTRING(buf)
                                  :@""];
-              
+          
           break; // stop processing after the first new line
         }
         else if (*pbuf == '\t')
@@ -798,18 +829,18 @@ static AsmFootPrint const fastStubHelperHelperARM =
           // replace tabs with spaces in order to keep indention
           size_t wsn = TAB_WIDTH - ((pbuf - buf - field_start_pos) % TAB_WIDTH);
           *pbuf = ' '; // change the tab char to space
-              
+          
           // shift everything after the tab char right
           for (char * p = buf + lenbuf; p > pbuf; --p)
           {
             *(p + wsn - 1) = *p;
             *p = ' ';
           }
-              
+          
           // adjust pointers
           pbuf += wsn;
           lenbuf += wsn;
-              
+          
           // store start position of the field for the next tab
           field_start_pos = pbuf - buf;
         }
@@ -826,7 +857,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
       
       // inner loop forces to switch task after every 4096 lines of assembly
     } while (ot_addr < ot_sect_addr + length && (++nAsmLine % 0x1000));
-
+    
     // close read handle
     close (pfdout[0]);
     
@@ -838,8 +869,9 @@ static AsmFootPrint const fastStubHelperHelperARM =
     close (pfdout[2]);
     
     [pipeCondition unlock];
-
+    
   } while (ot_addr < ot_sect_addr + length);
+  
   
   // clean up symbols
   for (vector<symbol>::iterator iter = sorted_symbols.begin();
@@ -849,6 +881,12 @@ static AsmFootPrint const fastStubHelperHelperARM =
     free(iter->name);
   }
   
+  // clean up LLVM disasm context
+  if (ot_arm_dc)     delete_arm_llvm_disassembler(ot_arm_dc);
+  if (ot_thumb_dc)   delete_thumb_llvm_disassembler(ot_thumb_dc);
+  if (ot_i386_dc)    delete_i386_llvm_disassembler(ot_i386_dc);
+  if (ot_x86_64_dc)  delete_x86_64_llvm_disassembler(ot_x86_64_dc);
+
   // close last block
   if (symbolName)
   {

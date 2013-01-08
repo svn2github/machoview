@@ -12,9 +12,15 @@
 
 -(id)init
 {
-    if (![super initWithWindowNibName:@"Preferences"])
-        return nil;
-    return self;
+  if (![super initWithWindowNibName:@"Preferences"])
+    return nil;
+  
+  return self;
+}
+
+- (IBAction)toggleUseLLVMDisassembler:(id)sender
+{
+  qflag = ([useLLVMDisassembler state] == NSOnState);
 }
 
 @end
