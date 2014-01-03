@@ -50,8 +50,7 @@ using namespace std;
 - (BOOL)is64bit
 {
   MATCH_STRUCT(mach_header,imageOffset);
-  return (mach_header->cputype == CPU_TYPE_X86_64 ||
-          mach_header->cputype == CPU_TYPE_POWERPC64);
+  return ((mach_header->cputype & CPU_ARCH_ABI64) == CPU_ARCH_ABI64);
 }
 
 //-----------------------------------------------------------------------------
@@ -2076,15 +2075,25 @@ struct CompareSectionByName
     if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V5TEJ) [node.details appendRow:@"":@"":@"00000007":@"CPU_SUBTYPE_ARM_V5TEJ"];
     if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_XSCALE)[node.details appendRow:@"":@"":@"00000008":@"CPU_SUBTYPE_ARM_XSCALE"];
     if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7)    [node.details appendRow:@"":@"":@"00000009":@"CPU_SUBTYPE_ARM_V7"];
-    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7F)   [node.details appendRow:@"":@"":@"00000010":@"CPU_SUBTYPE_ARM_V7F"];
-    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7S)   [node.details appendRow:@"":@"":@"00000011":@"CPU_SUBTYPE_ARM_V7S"];
-    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7K)   [node.details appendRow:@"":@"":@"00000012":@"CPU_SUBTYPE_ARM_V7K"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7F)   [node.details appendRow:@"":@"":@"0000000A":@"CPU_SUBTYPE_ARM_V7F (Cortex A9)"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7S)   [node.details appendRow:@"":@"":@"0000000B":@"CPU_SUBTYPE_ARM_V7S (Swift)"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7K)   [node.details appendRow:@"":@"":@"0000000C":@"CPU_SUBTYPE_ARM_V7K (Kirkwood40)"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V6M)   [node.details appendRow:@"":@"":@"0000000E":@"CPU_SUBTYPE_ARM_V6M"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7M)   [node.details appendRow:@"":@"":@"0000000F":@"CPU_SUBTYPE_ARM_V7M"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V7EM)  [node.details appendRow:@"":@"":@"00000010":@"CPU_SUBTYPE_ARM_V7EM"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM_V8)    [node.details appendRow:@"":@"":@"0000000D":@"CPU_SUBTYPE_ARM_V8"];
   }
-  else if (mach_header->cputype == CPU_TYPE_X86)
+  else if (mach_header->cputype == CPU_TYPE_I386)
   {
-    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_X86_ALL) [node.details appendRow:@"":@"":@"00000003":@"CPU_SUBTYPE_X86_ALL"]; 
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_I386_ALL) [node.details appendRow:@"":@"":@"00000003":@"CPU_SUBTYPE_I386_ALL"];
   }
-   
+  else if (mach_header->cputype == CPU_TYPE_ANY)
+  {
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_MULTIPLE) [node.details appendRow:@"":@"":@"FFFFFFFF":@"CPU_SUBTYPE_MULTIPLE"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_LITTLE_ENDIAN) [node.details appendRow:@"":@"":@"00000000":@"CPU_SUBTYPE_LITTLE_ENDIAN"];
+    if ((mach_header->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_BIG_ENDIAN) [node.details appendRow:@"":@"":@"00000001":@"CPU_SUBTYPE_BIG_ENDIAN"];
+  }
+  
   [self read_uint32:range lastReadHex:&lastReadHex];
   [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                          :lastReadHex
@@ -2173,7 +2182,8 @@ struct CompareSectionByName
                          :@"CPU Type"
                          :mach_header_64->cputype == CPU_TYPE_ANY ? @"CPU_TYPE_ANY" :
                           mach_header_64->cputype == CPU_TYPE_POWERPC64 ? @"CPU_TYPE_POWERPC64" :
-                          mach_header_64->cputype == CPU_TYPE_X86_64 ? @"CPU_TYPE_X86_64" : @"???"];
+                          mach_header_64->cputype == CPU_TYPE_X86_64 ? @"CPU_TYPE_X86_64" :
+                          mach_header_64->cputype == CPU_TYPE_ARM64 ? @"CPU_TYPE_ARM64" : @"???"];
   
   [self read_uint32:range lastReadHex:&lastReadHex];
   [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
@@ -2181,12 +2191,18 @@ struct CompareSectionByName
                          :@"CPU SubType"
                          :@""];
 
-  if ((mach_header_64->cpusubtype & CPU_SUBTYPE_LIB64) == CPU_SUBTYPE_LIB64) [node.details appendRow:@"":@"":@"80000000":@"CPU_SUBTYPE_LIB64"];
+  if ((mach_header_64->cpusubtype & CPU_SUBTYPE_LIB64) == CPU_SUBTYPE_LIB64)        [node.details appendRow:@"":@"":@"80000000":@"CPU_SUBTYPE_LIB64"];
 
   if (mach_header_64->cputype == CPU_TYPE_X86_64)
   {
     if ((mach_header_64->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_X86_64_ALL) [node.details appendRow:@"":@"":@"00000003":@"CPU_SUBTYPE_X86_64_ALL"]; 
   }
+  else if (mach_header_64->cputype == CPU_TYPE_ARM64)
+  {
+    if ((mach_header_64->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM64_ALL)  [node.details appendRow:@"":@"":@"00000000":@"CPU_SUBTYPE_ARM64_ALL"];
+    if ((mach_header_64->cpusubtype & ~CPU_SUBTYPE_MASK) == CPU_SUBTYPE_ARM64_V8)   [node.details appendRow:@"":@"":@"00000001":@"CPU_SUBTYPE_ARM64_V8"];
+  }
+
   
   [self read_uint32:range lastReadHex:&lastReadHex];
   [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]

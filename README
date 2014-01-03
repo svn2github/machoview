@@ -3,12 +3,22 @@ Hungry Apple icons by Nicholas Boyd (http://loafninja.deviantart.com)
 
 todo:
 - code sections parsing on demand
+- LC_ENCRYPTION_INFO_64,LC_LINKER_OPTION
+
+data in code and entries
+#define DICE_KIND_DATA              0x0001
+#define DICE_KIND_JUMP_TABLE8       0x0002
+#define DICE_KIND_JUMP_TABLE16      0x0003
+#define DICE_KIND_JUMP_TABLE32      0x0004
+#define DICE_KIND_ABS_JUMP_TABLE32  0x0005
+
+
 
 ver 2.3.8505
 - updated disassembler (LLVM included for testing)
 - some GUI improvements (PreferencePanel)
 - transitions to __weak references instead of __unsafe_retain
-- SDK 10.8 / deploy 10.7
+- SDK 10.8 / deploy 10.8
 - crash fix for disassembling encrypted ARM text sections
 
 ver 2.3.8370

@@ -10,7 +10,7 @@
 #import "Document.h"
 #import "DataController.h"
 #import "Layout.h"
-
+#include <unistd.h>
 
 //============================================================================
 @implementation MVOutlineView
@@ -314,7 +314,7 @@ enum ViewType
   NSProcessInfo * procInfo = [NSProcessInfo processInfo];
   NSBundle * mainBundle = [NSBundle mainBundle];
   
-  NSString * swapDir = [NSString stringWithFormat:@"%@%@_%@", 
+  NSString * swapDir = [NSString stringWithFormat:@"%@%@_%@.XXXXXXXXXXX",
                         NSTemporaryDirectory(),
                         [procInfo processName],
                         [mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
@@ -520,8 +520,17 @@ enum ViewType
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError
 {
   // create a temporary copy for patching
-  NSString * tmpFilePath = NSSTRING(tempnam(CSTRING([MVDocument temporaryDirectory]), NULL));
-  NSURL * tmpURL = [NSURL fileURLWithPath:tmpFilePath];
+  const char *tmp = [[MVDocument temporaryDirectory] UTF8String];
+  char *tmpFilePath = strdup(tmp);
+  if (mktemp(tmpFilePath) == NULL)
+  {
+    NSLog(@"mktemp failed!");
+    free(tmpFilePath);
+    return NO;
+  }
+
+  NSURL * tmpURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:tmpFilePath]];
+  free(tmpFilePath);
   
   [[NSFileManager defaultManager] copyItemAtURL:absoluteURL 
                                           toURL:tmpURL
@@ -543,7 +552,7 @@ enum ViewType
 
   @try 
   {
-    [dataController createLayouts];
+    [dataController createLayouts:dataController.rootNode location:0 length:[dataController.fileData length]];
   }
   @catch (NSException * exception) 
   {

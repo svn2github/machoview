@@ -559,7 +559,7 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
   if (filter == nil || [filter length] == 0)
   {
     // copy everything (copy by elems because want to exclude later added rows)
-    displayRows = [NSArray arrayWithArray:rows];
+    displayRows = [NSMutableArray arrayWithArray:rows];
     
     /*
     displayRows = [[NSMutableArray alloc] init];
@@ -885,11 +885,12 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
   switch (cputype)
   {
     default:                  return @"???"; 
-    case CPU_TYPE_X86:        return @"X86";
+    case CPU_TYPE_I386:       return @"X86";
     case CPU_TYPE_POWERPC:    return @"PPC";
     case CPU_TYPE_X86_64:     return @"X86_64";
     case CPU_TYPE_POWERPC64:  return @"PPC64";
-    case CPU_TYPE_ARM:        return @"ARM";  
+    case CPU_TYPE_ARM:        return @"ARM";
+    case CPU_TYPE_ARM64:      return @"ARM64";
   }
 }
 
@@ -908,6 +909,18 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
     case CPU_SUBTYPE_ARM_V7F:     return @"ARM_V7F";
     case CPU_SUBTYPE_ARM_V7K:     return @"ARM_V7K";
     case CPU_SUBTYPE_ARM_V7S:     return @"ARM_V7S";
+    case CPU_SUBTYPE_ARM_V8:      return @"ARM_V8";
+  }
+}
+
+//----------------------------------------------------------------------------
+-(NSString *)getARM64Cpu:(cpu_subtype_t)cpusubtype
+{
+  switch (cpusubtype)
+  {
+    default:                      return @"???";
+    case CPU_SUBTYPE_ARM64_ALL:   return @"ARM64_ALL";
+    case CPU_SUBTYPE_ARM64_V8:    return @"ARM64_V8";
   }
 }
 
@@ -916,7 +929,8 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 {
   return ([machine isEqualToString:@"X86"] == YES ||
           [machine isEqualToString:@"X86_64"] == YES ||
-          [machine isEqualToString:@"ARM"] == YES);
+          [machine isEqualToString:@"ARM"] == YES ||
+          [machine isEqualToString:@"ARM64"] == YES);
 }
 
 //----------------------------------------------------------------------------
@@ -955,6 +969,41 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 }
 
 //----------------------------------------------------------------------------
+-(void)createMachO64Layout:(MVNode *)node
+            mach_header_64:(struct mach_header_64 const *)mach_header_64
+{
+  NSString * machine = [self getMachine:mach_header_64->cputype];
+  
+  node.caption = [NSString stringWithFormat:@"%@ (%@)",
+                  mach_header_64->filetype == MH_OBJECT      ? @"Object " :
+                  mach_header_64->filetype == MH_EXECUTE     ? @"Executable " :
+                  mach_header_64->filetype == MH_FVMLIB      ? @"Fixed VM Shared Library" :
+                  mach_header_64->filetype == MH_CORE        ? @"Core" :
+                  mach_header_64->filetype == MH_PRELOAD     ? @"Preloaded Executable" :
+                  mach_header_64->filetype == MH_DYLIB       ? @"Shared Library " :
+                  mach_header_64->filetype == MH_DYLINKER    ? @"Dynamic Link Editor" :
+                  mach_header_64->filetype == MH_BUNDLE      ? @"Bundle" :
+                  mach_header_64->filetype == MH_DYLIB_STUB  ? @"Shared Library Stub" :
+                  mach_header_64->filetype == MH_DSYM        ? @"Debug Symbols" :
+                  mach_header_64->filetype == MH_KEXT_BUNDLE ? @"Kernel Extension" : @"?????",
+                  [machine isEqualToString:@"ARM64"] == YES ? [self getARM64Cpu:mach_header_64->cpusubtype] : machine];
+  
+  MachOLayout * layout = [MachOLayout layoutWithDataController:self rootNode:node];
+  
+  [node.userInfo setObject:layout forKey:MVLayoutUserInfoKey];
+  
+  if ([self isSupportedMachine:machine])
+  {
+    [layouts addObject:layout];
+  }
+  else
+  {
+    // there is no detail to extract
+    [layout.archiver halt];
+  }
+}
+
+//----------------------------------------------------------------------------
 -(void)createArchiveLayout:(MVNode *)node machine:(NSString *)machine
 {
   node.caption = machine ? [NSString stringWithFormat:@"Static Library (%@)", machine] : @"Static Library";
@@ -975,6 +1024,53 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 }
 
 //----------------------------------------------------------------------------
+// create Mach-O layouts based on file headers
+- (void)createLayouts:(MVNode *)parent
+             location:(uint32_t)location
+               length:(uint32_t)length
+{
+  uint32_t magic = *(uint32_t*)((uint8_t *)[fileData bytes] + location);
+  
+  switch (magic)
+  {
+    case FAT_MAGIC:
+    case FAT_CIGAM:
+    {
+      struct fat_header fat_header;
+      [fileData getBytes:&fat_header range:NSMakeRange(location, sizeof(struct fat_header))];
+      if (magic == FAT_CIGAM)
+        swap_fat_header(&fat_header, NX_LittleEndian);
+      [self createFatLayout:parent fat_header:&fat_header];
+    } break;
+      
+    case MH_MAGIC:
+    case MH_CIGAM:
+    {
+      struct mach_header mach_header;
+      [fileData getBytes:&mach_header range:NSMakeRange(location, sizeof(struct mach_header))];
+      if (magic == MH_CIGAM)
+        swap_mach_header(&mach_header, NX_LittleEndian);
+      [self createMachOLayout:parent mach_header:&mach_header];
+    } break;
+      
+    case MH_MAGIC_64:
+    case MH_CIGAM_64:
+    {
+      struct mach_header_64 mach_header_64;
+      [fileData getBytes:&mach_header_64 range:NSMakeRange(location, sizeof(struct mach_header_64))];
+      if (magic == MH_CIGAM_64)
+        swap_mach_header_64(&mach_header_64, NX_LittleEndian);
+      [self createMachO64Layout:parent mach_header_64:&mach_header_64];
+    } break;
+      
+    default:
+      [self createArchiveLayout:parent machine:nil];
+  }
+  
+  parent.dataRange = NSMakeRange(location, length);
+}
+
+//----------------------------------------------------------------------------
 -(void)createFatLayout:(MVNode *)node
             fat_header:(struct fat_header const *)fat_header
 {
@@ -991,67 +1087,17 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
     [fileData getBytes:&fat_arch range:NSMakeRange(sizeof(struct fat_header) + nimg * sizeof(struct fat_arch), sizeof(struct fat_arch))];
     swap_fat_arch(&fat_arch, 1, NX_LittleEndian);
     
+    MVNode * archNode = [node insertChild:nil location:fat_arch.offset length:fat_arch.size];
+
     if (*(uint64_t*)((uint8_t *)[fileData bytes] + fat_arch.offset) == *(uint64_t*)"!<arch>\n")
     {
-      MVNode * archNode = [node insertChild:nil location:fat_arch.offset length:fat_arch.size];
       [self createArchiveLayout:archNode machine:[self getMachine:fat_arch.cputype]];
     }
     else
     {
-      // need to make copy for byte swapping
-      struct mach_header mach_header;
-      [fileData getBytes:&mach_header range:NSMakeRange(fat_arch.offset, sizeof(struct mach_header))];
-      // XXX: workaround because NXGetArchInfoFromCpuType() doesn't know CPU_SUBTYPE_ARM_V7S and returns
-      //      invalid data leading to a crash on byteorder access
-      if (fat_arch.cpusubtype == CPU_SUBTYPE_ARM_V7S) fat_arch.cpusubtype = CPU_SUBTYPE_ARM_V7K;
-      enum NXByteOrder byteorder = NXGetArchInfoFromCpuType(fat_arch.cputype,fat_arch.cpusubtype)->byteorder;
-      if (byteorder == NX_BigEndian)
-      {
-        swap_mach_header(&mach_header, NX_LittleEndian);
-      }
-      
-      MVNode * machONode = [node insertChild:nil location:fat_arch.offset length:fat_arch.size];
-      [self createMachOLayout:machONode mach_header:&mach_header];
+      [self createLayouts:archNode location:fat_arch.offset length:fat_arch.size];
     }
   }
-  
-}
-
-//----------------------------------------------------------------------------
-// create Mach-O layouts based on file headers
-- (void)createLayouts
-{
-  uint32_t magic = *(uint32_t*)[fileData bytes];
-  
-  switch (magic)
-  {
-    case FAT_MAGIC:
-    case FAT_CIGAM:
-    {
-      struct fat_header fat_header;
-      [fileData getBytes:&fat_header length:sizeof(struct fat_header)];
-      if (magic == FAT_CIGAM)
-        swap_fat_header(&fat_header, NX_LittleEndian);
-      [self createFatLayout:rootNode fat_header:&fat_header];
-    } break;
-      
-    case MH_MAGIC:
-    case MH_MAGIC_64:
-    case MH_CIGAM:
-    case MH_CIGAM_64:
-    {
-      struct mach_header mach_header;
-      [fileData getBytes:&mach_header length:sizeof(struct mach_header)];
-      if (magic == MH_CIGAM || magic == MH_CIGAM_64)
-        swap_mach_header(&mach_header, NX_LittleEndian);
-      [self createMachOLayout:rootNode mach_header:&mach_header];
-    } break;
-    
-    default:
-      [self createArchiveLayout:rootNode machine:nil];
-  }
-  
-  rootNode.dataRange = NSMakeRange(0, [fileData length]);
 }
 
 //----------------------------------------------------------------------------

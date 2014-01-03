@@ -180,15 +180,15 @@ using namespace std;
       
       uint32_t r_type = scattered_relocation_info->r_type;
       if (
-          (mach_header->cputype == CPU_TYPE_X86 && (r_type == GENERIC_RELOC_SECTDIFF || r_type == GENERIC_RELOC_LOCAL_SECTDIFF)) 
+          (mach_header->cputype == CPU_TYPE_I386 && (r_type == GENERIC_RELOC_SECTDIFF || r_type == GENERIC_RELOC_LOCAL_SECTDIFF))
           ||
           (mach_header->cputype == CPU_TYPE_ARM && (r_type == ARM_RELOC_SECTDIFF || r_type == ARM_RELOC_LOCAL_SECTDIFF))
-          )
+         )
       {
         prev_scattered_relocation_info = scattered_relocation_info;
       }
       else if (
-               ((mach_header->cputype == CPU_TYPE_X86 && r_type == GENERIC_RELOC_PAIR)
+               ((mach_header->cputype == CPU_TYPE_I386 && r_type == GENERIC_RELOC_PAIR)
                ||
                (mach_header->cputype == CPU_TYPE_ARM && r_type == ARM_RELOC_PAIR))
                && prev_scattered_relocation_info
@@ -220,7 +220,9 @@ using namespace std;
       }
     }
     
-    if (mach_header->cputype == CPU_TYPE_X86)
+    //=============================== normal relocations ===============================
+    
+    if (mach_header->cputype == CPU_TYPE_I386)
     {
       uint32_t r_type = (relocation_info ? relocation_info->r_type : scattered_relocation_info->r_type);
       
@@ -235,17 +237,17 @@ using namespace std;
     else if (mach_header->cputype == CPU_TYPE_ARM)
     {
       uint32_t r_type = (relocation_info ? relocation_info->r_type : scattered_relocation_info->r_type);
-      
+     
       [node.details appendRow:@"":@"":@"Type"
                              :r_type == ARM_RELOC_VANILLA ? @"ARM_RELOC_VANILLA" :
                               r_type == ARM_RELOC_PAIR ? @"ARM_RELOC_PAIR" :
                               r_type == ARM_RELOC_SECTDIFF ? @"ARM_RELOC_SECTDIFF" :
                               r_type == ARM_RELOC_LOCAL_SECTDIFF ? @"ARM_RELOC_LOCAL_SECTDIFF" :
-                              r_type == ARM_RELOC_PB_LA_PTR ? @"ARM_RELOC_PB_LA_PTR" : 
+                              r_type == ARM_RELOC_PB_LA_PTR ? @"ARM_RELOC_PB_LA_PTR" :
                               r_type == ARM_RELOC_BR24 ? @"ARM_RELOC_BR24" :
-                              r_type == ARM_THUMB_RELOC_BR22 ? @"ARM_THUMB_RELOC_BR22" : 
+                              r_type == ARM_THUMB_RELOC_BR22 ? @"ARM_THUMB_RELOC_BR22" :
                               r_type == ARM_THUMB_32BIT_BRANCH ? @"ARM_THUMB_32BIT_BRANCH" :
-                              r_type == ARM_RELOC_HALF ? @"ARM_RELOC_HALF" : 
+                              r_type == ARM_RELOC_HALF ? @"ARM_RELOC_HALF" :
                               r_type == ARM_RELOC_HALF_SECTDIFF ? @"ARM_RELOC_HALF_SECTDIFF" : @"?????"];
     }
     
@@ -293,6 +295,8 @@ using namespace std;
   
   NSRange range = NSMakeRange(location,0);
   NSString * lastReadHex;
+  
+  MATCH_STRUCT(mach_header_64,imageOffset);
   
   struct relocation_info const * prev_relocation_info = NULL;
   
@@ -602,16 +606,34 @@ using namespace std;
     }
     //========== end of differentation 
     
-    [node.details appendRow:@"":@"":@"Type"
-                           :relocation_info->r_type == X86_64_RELOC_UNSIGNED ? @"X86_64_RELOC_UNSIGNED" :
-                            relocation_info->r_type == X86_64_RELOC_SIGNED ? @"X86_64_RELOC_SIGNED" :
-                            relocation_info->r_type == X86_64_RELOC_BRANCH ? @"X86_64_RELOC_BRANCH" :
-                            relocation_info->r_type == X86_64_RELOC_GOT_LOAD ? @"X86_64_RELOC_GOT_LOAD" :
-                            relocation_info->r_type == X86_64_RELOC_GOT ? @"X86_64_RELOC_GOT" :
-                            relocation_info->r_type == X86_64_RELOC_SUBTRACTOR ? @"X86_64_RELOC_SUBTRACTOR" :
-                            relocation_info->r_type == X86_64_RELOC_SIGNED_1 ? @"X86_64_RELOC_SIGNED_1" :
-                            relocation_info->r_type == X86_64_RELOC_SIGNED_2 ? @"X86_64_RELOC_SIGNED_2" :
-                            relocation_info->r_type == X86_64_RELOC_SIGNED_4 ? @"X86_64_RELOC_SIGNED_4" : @"?????"];
+    if (mach_header_64->cputype == CPU_TYPE_X86_64)
+    {
+      [node.details appendRow:@"":@"":@"Type"
+                             :relocation_info->r_type == X86_64_RELOC_UNSIGNED ? @"X86_64_RELOC_UNSIGNED" :
+                              relocation_info->r_type == X86_64_RELOC_SIGNED ? @"X86_64_RELOC_SIGNED" :
+                              relocation_info->r_type == X86_64_RELOC_BRANCH ? @"X86_64_RELOC_BRANCH" :
+                              relocation_info->r_type == X86_64_RELOC_GOT_LOAD ? @"X86_64_RELOC_GOT_LOAD" :
+                              relocation_info->r_type == X86_64_RELOC_GOT ? @"X86_64_RELOC_GOT" :
+                              relocation_info->r_type == X86_64_RELOC_SUBTRACTOR ? @"X86_64_RELOC_SUBTRACTOR" :
+                              relocation_info->r_type == X86_64_RELOC_SIGNED_1 ? @"X86_64_RELOC_SIGNED_1" :
+                              relocation_info->r_type == X86_64_RELOC_SIGNED_2 ? @"X86_64_RELOC_SIGNED_2" :
+                              relocation_info->r_type == X86_64_RELOC_SIGNED_4 ? @"X86_64_RELOC_SIGNED_4" : @"?????"];
+    }
+    else if (mach_header_64->cputype == CPU_TYPE_ARM64)
+    {
+      [node.details appendRow:@"":@"":@"Type"
+                             :relocation_info->r_type == ARM64_RELOC_UNSIGNED ? @"ARM64_RELOC_UNSIGNED" :
+                              relocation_info->r_type == ARM64_RELOC_SUBTRACTOR ? @"ARM64_RELOC_SUBTRACTOR" :
+                              relocation_info->r_type == ARM64_RELOC_BRANCH26 ? @"ARM64_RELOC_BRANCH26" :
+                              relocation_info->r_type == ARM64_RELOC_PAGE21 ? @"ARM64_RELOC_PAGE21" :
+                              relocation_info->r_type == ARM64_RELOC_PAGEOFF12 ? @"ARM64_RELOC_PAGEOFF12" :
+                              relocation_info->r_type == ARM64_RELOC_GOT_LOAD_PAGE21 ? @"ARM64_RELOC_GOT_LOAD_PAGE21" :
+                              relocation_info->r_type == ARM64_RELOC_GOT_LOAD_PAGEOFF12 ? @"ARM64_RELOC_GOT_LOAD_PAGEOFF12" :
+                              relocation_info->r_type == ARM64_RELOC_POINTER_TO_GOT ? @"ARM64_RELOC_POINTER_TO_GOT" :
+                              relocation_info->r_type == ARM64_RELOC_TLVP_LOAD_PAGE21 ? @"ARM64_RELOC_TLVP_LOAD_PAGE21" :
+                              relocation_info->r_type == ARM64_RELOC_TLVP_LOAD_PAGEOFF12 ? @"ARM64_RELOC_TLVP_LOAD_PAGEOFF12" :
+                              relocation_info->r_type == ARM64_RELOC_ADDEND ? @"ARM64_RELOC_ADDEND" : @"?????"];
+    }
     
     if (relocation_info)
     {
