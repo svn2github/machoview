@@ -646,7 +646,7 @@ _hex2int(char const * a, uint32_t len)
     @try
     {
       [self createSplitSegmentNode:segmentSplitInfoNode 
-                           caption:(lastNodeCaption = @"Code-to-Data References") 
+                           caption:(lastNodeCaption = @"Shared Region Info")
                           location:segmentSplitInfoNode.dataRange.location
                             length:segmentSplitInfoNode.dataRange.length
                        baseAddress:base_addr];
@@ -948,7 +948,7 @@ _hex2int(char const * a, uint32_t len)
     @try
     {
       [self createSplitSegmentNode:segmentSplitInfoNode 
-                           caption:(lastNodeCaption = @"Code-to-Data References") 
+                           caption:(lastNodeCaption = @"Shared Region Info") 
                           location:segmentSplitInfoNode.dataRange.location
                             length:segmentSplitInfoNode.dataRange.length
                        baseAddress:base_addr];

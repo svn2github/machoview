@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		256AC3DA0F4B6AC300CF3369 /* AppController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* AppController.mm */; };
 		3C0ADEB0169CD42600DA428E /* README in Copy Files */ = {isa = PBXBuildFile; fileRef = 3CE90DFC11F6107600543402 /* README */; };
-		3C0B08EA1875F43500A22D6D /* arm64 in Resources */ = {isa = PBXBuildFile; fileRef = 3C0B08E91875F43500A22D6D /* arm64 */; };
 		3C0F958411F6589D0070A2FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3C0F957E11F6589D0070A2FE /* InfoPlist.strings */; };
 		3C0F958511F6589D0070A2FE /* Layout.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C0F958011F6589D0070A2FE /* Layout.xib */; };
 		3C0F958611F6589D0070A2FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C0F958211F6589D0070A2FE /* MainMenu.xib */; };
@@ -45,8 +44,8 @@
 		3C3763CD183829C9005E6BFB /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = lib;
-			dstSubfolderSpec = 16;
+			dstPath = ../lib;
+			dstSubfolderSpec = 6;
 			files = (
 				3C3763CF18382A68005E6BFB /* libLTO.dylib in CopyFiles */,
 			);
@@ -73,13 +72,13 @@
 		29B97316FDCFA39411CA2CEA /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		3C0B08E91875F43500A22D6D /* arm64 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = arm64; sourceTree = "<group>"; };
 		3C0F957F11F6589D0070A2FE /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3C0F958111F6589D0070A2FE /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/Layout.xib; sourceTree = "<group>"; };
 		3C0F958311F6589D0070A2FE /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3C0F958711F658BF0070A2FE /* greenApple.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = greenApple.icns; sourceTree = "<group>"; };
 		3C0F958811F658BF0070A2FE /* redApple.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = redApple.icns; sourceTree = "<group>"; };
 		3C1163F013D5B88D007B4A6E /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
+		3C2CA5D6187895A000A6F321 /* reloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reloc.h; sourceTree = "<group>"; };
 		3C30845A11FDAF6F008A270F /* createdmg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = createdmg; sourceTree = "<group>"; };
 		3C34A82914892FF1005B53F6 /* FatLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FatLayout.h; sourceTree = "<group>"; };
 		3C34A82A14892FF1005B53F6 /* FatLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FatLayout.mm; sourceTree = "<group>"; };
@@ -272,13 +271,21 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3C2CA5D5187895A000A6F321 /* arm64 */ = {
+			isa = PBXGroup;
+			children = (
+				3C2CA5D6187895A000A6F321 /* reloc.h */,
+			);
+			path = arm64;
+			sourceTree = "<group>";
+		};
 		3C78CB26139EE44B006C9591 /* mach-o */ = {
 			isa = PBXGroup;
 			children = (
 				3CDFB35D139F603C00F46F18 /* arch.h */,
 				3CDFB365139F603C00F46F18 /* reloc.h */,
 				3CDFB35E139F603C00F46F18 /* arm */,
-				3C0B08E91875F43500A22D6D /* arm64 */,
+				3C2CA5D5187895A000A6F321 /* arm64 */,
 				3CDFB367139F603C00F46F18 /* x86_64 */,
 				3CDFB360139F603C00F46F18 /* compact_unwind_encoding.h */,
 				3CDFB361139F603C00F46F18 /* fat.h */,
@@ -370,7 +377,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C0B08EA1875F43500A22D6D /* arm64 in Resources */,
 				3C0F958411F6589D0070A2FE /* InfoPlist.strings in Resources */,
 				3C0F958511F6589D0070A2FE /* Layout.xib in Resources */,
 				3C0F958611F6589D0070A2FE /* MainMenu.xib in Resources */,
@@ -480,6 +486,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)",
 					"$(SRCROOT)/otool_disasm/include",

@@ -1243,7 +1243,9 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
       { 
         [saverLock lock];
 
+#ifndef NDEBUG
         NSLog(@"%@: saving %lu rows",[NSThread currentThread],(unsigned long)[objectsToSave count]);
+#endif
         for (id <MVSerializing> serializable in objectsToSave)
         {
           [serializable saveToFile:pFile];

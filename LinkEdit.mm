@@ -1671,8 +1671,6 @@ using namespace std;
   MVNodeSaver nodeSaver;
   MVNode * node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver]; 
   
-  uint64_t address = baseAddress;
-  
   NSRange range = NSMakeRange(location,0);
   NSString * lastReadHex;
 
@@ -1711,10 +1709,11 @@ using namespace std;
                             kind == 0x1E ? @"thumb2 movt low high 4 bits=0xE" :
                             kind == 0x1f ? @"thumb2 movt low high 4 bits=0xF" : @"???"];
     
-    uint64_t offset;
+    uint64_t address = baseAddress;
+    uint64_t offset = 0;
     do
     {
-      uint64_t offset = [self read_uleb128:range lastReadHex:&lastReadHex];
+      offset = [self read_uleb128:range lastReadHex:&lastReadHex];
       address += offset;
       
       [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
