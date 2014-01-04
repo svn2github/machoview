@@ -1360,7 +1360,7 @@ static AsmFootPrint const SDK106Target104X86v2 =
       
       for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
       {
-        struct load_command const * load_command = (struct load_command const *)(*cmdIter);
+        struct load_command const * load_command = *cmdIter;
         if (load_command->cmd == LC_DYLD_INFO_ONLY)
         {
           rootNode.caption = [rootNode.caption stringByAppendingString:@" [SDK10.6 Target10.6]"]; 
@@ -1398,7 +1398,7 @@ static AsmFootPrint const SDK106Target104X86v2 =
       
       for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
       {
-        struct load_command const * load_command = (struct load_command const *)(*cmdIter);
+        struct load_command const * load_command = *cmdIter;
         if (load_command->cmd == LC_DYLD_INFO_ONLY)
         {
           NSLog(@"LC_DYLD_INFO_ONLY  ==> target10.6");

@@ -1032,7 +1032,7 @@ using namespace std;
 }
 
 //-----------------------------------------------------------------------------
-- (MVNode *) createIndirectNode:parent 
+- (MVNode *) createISymbolsNode:parent
                         caption:(NSString *)caption
                        location:(uint32_t)location
                          length:(uint32_t)length
@@ -1060,12 +1060,15 @@ using namespace std;
         continue;
       }
       
+      // preserve location of indirect symbol index for further processing
+      isymbols.push_back((uint32_t *)[self imageAt:location + sizeof(uint32_t)*nindsym]);
+
       // calculate stub or pointer length
       uint32_t length = (section->reserved2 > 0 ? section->reserved2 : sizeof(uint32_t));
         
       // calculate indirect value location
       uint32_t indirectAddress = section->addr + (nindsym - section->reserved1) * length;
-        
+      
       // accumulate search info
       NSUInteger bookmark = node.details.rowCount;
       NSString * symbolName = nil;
@@ -1073,7 +1076,7 @@ using namespace std;
         
       // read indirect symbol index
       uint32_t indirectIndex = [self read_uint32:range lastReadHex:&lastReadHex];
-        
+      
       if ((indirectIndex & (INDIRECT_SYMBOL_LOCAL | INDIRECT_SYMBOL_ABS)) == 0)
       {
         if (indirectIndex >= symbols.size())
@@ -1157,7 +1160,7 @@ using namespace std;
 }
 
 //-----------------------------------------------------------------------------
-- (MVNode *) createIndirect64Node:parent 
+- (MVNode *) createISymbols64Node:parent
                           caption:(NSString *)caption
                          location:(uint32_t)location
                            length:(uint32_t)length
@@ -1185,12 +1188,15 @@ using namespace std;
         continue;
       }
       
+      // preserve location of indirect symbol index for further processing
+      isymbols.push_back((uint32_t *)[self imageAt:location + sizeof(uint32_t)*nindsym]);
+
       // calculate stub or pointer length
       uint32_t length = (section_64->reserved2 > 0 ? section_64->reserved2 : sizeof(uint64_t));
         
       // calculate indirect value location
       uint64_t indirectAddress = section_64->addr + (nindsym - section_64->reserved1) * length;
-        
+
       // accumulate search info
       NSUInteger bookmark = node.details.rowCount;
       NSString * symbolName = nil;
@@ -1774,6 +1780,7 @@ using namespace std;
   while (NSMaxRange(range) < location + length)
   {
     MATCH_STRUCT(data_in_code_entry, NSMaxRange(range))
+    dices.push_back(data_in_code_entry);
     
     [self read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]

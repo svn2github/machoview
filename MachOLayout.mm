@@ -394,7 +394,7 @@ _hex2int(char const * a, uint32_t len)
 
   for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
   {
-    struct load_command const * load_command = (struct load_command const *)(*cmdIter);
+    struct load_command const * load_command = *cmdIter;
     switch (load_command->cmd)
     {
       case LC_SEGMENT:        
@@ -591,7 +591,7 @@ _hex2int(char const * a, uint32_t len)
       //==============================================
       if (dysymtab_command->indirectsymoff * dysymtab_command->nindirectsyms > 0)
       {
-        [self createIndirectNode:dysymtabNode 
+        [self createISymbolsNode:dysymtabNode
                          caption:(lastNodeCaption = @"Indirect Symbols")
                         location:dysymtab_command->indirectsymoff + imageOffset
                           length:dysymtab_command->nindirectsyms * sizeof(uint32_t)];
@@ -706,7 +706,7 @@ _hex2int(char const * a, uint32_t len)
   
   for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
   {
-    struct load_command const * load_command = (struct load_command const *)(*cmdIter);
+    struct load_command const * load_command = *cmdIter;
     switch (load_command->cmd)
     {
       case LC_SEGMENT_64:     
@@ -893,7 +893,7 @@ _hex2int(char const * a, uint32_t len)
       //==============================================
       if (dysymtab_command->indirectsymoff * dysymtab_command->nindirectsyms > 0)
       {
-        [self createIndirect64Node:dysymtabNode 
+        [self createISymbols64Node:dysymtabNode
                            caption:(lastNodeCaption = @"Indirect Symbols")
                           location:dysymtab_command->indirectsymoff + imageOffset
                             length:dysymtab_command->nindirectsyms * sizeof(uint32_t)];
@@ -987,7 +987,7 @@ _hex2int(char const * a, uint32_t len)
   
   for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
   {
-    struct load_command const * load_command = (struct load_command const *)(*cmdIter);
+    struct load_command const * load_command = *cmdIter;
     switch (load_command->cmd)
     {
       case LC_SEGMENT:     

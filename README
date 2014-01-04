@@ -3,6 +3,8 @@ Hungry Apple icons by Nicholas Boyd (http://loafninja.deviantart.com)
 
 todo:
 - code sections parsing on demand
+
+ver 2.4.nnnn
 - ARM64
 - LC_ENCRYPTION_INFO_64,LC_LINKER_OPTION
 - data in code and entries (DICES)

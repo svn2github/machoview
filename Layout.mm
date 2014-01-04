@@ -51,6 +51,12 @@
 }
 
 //-----------------------------------------------------------------------------
+- (void const *)imageAt:(uint32_t)location
+{
+  return (uint8_t *)[dataController.realData bytes] + location;
+}
+
+//-----------------------------------------------------------------------------
 - (NSString *)description
 {
   return [[super description] stringByAppendingFormat:@" [%@]",rootNode.caption];

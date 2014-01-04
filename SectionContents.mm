@@ -568,16 +568,6 @@ static AsmFootPrint const fastStubHelperHelperARM =
     return node;
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
-  struct dysymtab_command const * dysymtab_command = NULL;
-  for (CommandVector::const_iterator cmdIter = commands.begin(); cmdIter != commands.end(); ++cmdIter)
-  {
-    struct load_command const * load_command = (struct load_command const *)(*cmdIter);
-    if (load_command->cmd == LC_DYSYMTAB)
-    {
-      dysymtab_command = (struct dysymtab_command const *)load_command; 
-      break;
-    }
-  }
   
   char *                      ot_sect = (char *)[dataController.fileData bytes] + location;
   uint32_t                    ot_left = length;
@@ -590,8 +580,8 @@ static AsmFootPrint const fastStubHelperHelperARM =
   uint32_t                    ot_nsymbols = ([self is64bit] == NO ? symbols.size() : symbols_64.size());
   char *                      ot_strings = (char *)strtab;
   uint32_t                    ot_strings_size = (char *)[dataController.fileData bytes] - strtab;
-  uint32_t *                  ot_indirect_symbols = (dysymtab_command ? (uint32_t*)((char*)[dataController.fileData bytes] + dysymtab_command->indirectsymoff + imageOffset) : NULL);
-  uint32_t                    ot_nindirect_symbols = (dysymtab_command ? dysymtab_command->nindirectsyms : 0);
+  uint32_t *                  ot_indirect_symbols = (isymbols.empty() ? NULL : const_cast<uint32_t *>(isymbols[0]));
+  uint32_t                    ot_nindirect_symbols = isymbols.size();
   struct load_command *       ot_load_commands = (struct load_command *)(commands[0]);
   uint32_t                    ot_ncmds = commands.size();
   uint32_t                    ot_sizeofcmds = mach_header->sizeofcmds;
@@ -601,8 +591,8 @@ static AsmFootPrint const fastStubHelperHelperARM =
   BOOL                        ot_verbose = TRUE;
   BOOL                        ot_llvm_mc = FALSE; /* disassemble as llvm-mc will assemble */
 
-  struct data_in_code_entry * ot_dices = NULL; // data-in-code entries // TODO
-  uint32_t                    ot_ndices = 0;   // number of data-in-code entries // TODO
+  struct data_in_code_entry * ot_dices = (dices.empty() ? NULL : const_cast<struct data_in_code_entry *>(dices[0]));
+  uint32_t                    ot_ndices = dices.size();
   char *                      ot_object_addr = (char *)mach_header;
   uint32_t                    ot_object_size = imageSize;
 
