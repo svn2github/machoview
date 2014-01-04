@@ -1759,4 +1759,48 @@ using namespace std;
   return node;
 }
 
+//-----------------------------------------------------------------------------
+- (MVNode *) createDataInCodeEntriesNode:parent
+                                 caption:(NSString *)caption
+                                location:(uint32_t)location
+                                  length:(uint32_t)length
+{
+  MVNodeSaver nodeSaver;
+  MVNode * node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
+  
+  NSRange range = NSMakeRange(location,0);
+  NSString * lastReadHex;
+  
+  while (NSMaxRange(range) < location + length)
+  {
+    MATCH_STRUCT(data_in_code_entry, NSMaxRange(range))
+    
+    [self read_uint32:range lastReadHex:&lastReadHex];
+    [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
+                           :lastReadHex
+                           :@"Offset"
+                           :[self findSymbolAtRVA:[self fileOffsetToRVA:data_in_code_entry->offset + imageOffset]]];
+
+    [self read_uint16:range lastReadHex:&lastReadHex];
+    [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
+                           :lastReadHex
+                           :@"Length"
+                           :[NSString stringWithFormat:@"%u", (uint32_t)data_in_code_entry->length]];
+
+    [self read_uint16:range lastReadHex:&lastReadHex];
+    [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
+                           :lastReadHex
+                           :@"Kind"
+                           :data_in_code_entry->kind == DICE_KIND_DATA ? @"DICE_KIND_DATA" :
+                            data_in_code_entry->kind == DICE_KIND_JUMP_TABLE8 ? @"DICE_KIND_JUMP_TABLE8" :
+                            data_in_code_entry->kind == DICE_KIND_JUMP_TABLE16 ? @"DICE_KIND_JUMP_TABLE16" :
+                            data_in_code_entry->kind == DICE_KIND_JUMP_TABLE32 ? @"DICE_KIND_JUMP_TABLE32" :
+                            data_in_code_entry->kind == DICE_KIND_ABS_JUMP_TABLE32 ? @"DICE_KIND_ABS_JUMP_TABLE32" : @"???"];
+    
+    [node.details setAttributes:MVUnderlineAttributeName,@"YES",nil];
+  }
+  
+  return node;
+}
+
 @end

@@ -384,6 +384,7 @@ _hex2int(char const * a, uint32_t len)
   struct linkedit_data_command const * segment_split_info = NULL;
   struct linkedit_data_command const * code_signature = NULL;
   struct linkedit_data_command const * function_starts = NULL;
+  struct linkedit_data_command const * data_in_code_entries = NULL;
   
   MATCH_STRUCT(mach_header,imageOffset);
   
@@ -423,6 +424,7 @@ _hex2int(char const * a, uint32_t len)
       case LC_SEGMENT_SPLIT_INFO: segment_split_info = (struct linkedit_data_command const *)load_command; break;
       case LC_CODE_SIGNATURE: code_signature = (struct linkedit_data_command const *)load_command; break;
       case LC_FUNCTION_STARTS: function_starts = (struct linkedit_data_command const *)load_command; break;
+      case LC_DATA_IN_CODE: data_in_code_entries = (struct linkedit_data_command const *)load_command; break;
       default: ; // not interested
     }
   }
@@ -432,6 +434,7 @@ _hex2int(char const * a, uint32_t len)
   MVNode * twoLevelHintsNode = nil;
   MVNode * segmentSplitInfoNode = nil;
   MVNode * functionStartsNode = nil;
+  MVNode * dataInCodeEntriesNode = nil;
   
   NSString * lastNodeCaption;
   
@@ -520,6 +523,14 @@ _hex2int(char const * a, uint32_t len)
                                       caption:@"Function Starts"
                                      location:function_starts->dataoff + imageOffset
                                        length:function_starts->datasize];
+  }
+
+  if (data_in_code_entries)
+  {
+    dataInCodeEntriesNode = [self createDataNode:rootNode
+                                         caption:@"Data in Code Entries"
+                                        location:data_in_code_entries->dataoff + imageOffset
+                                          length:data_in_code_entries->datasize];
   }
   
   //============ Symbol Table ====================
@@ -661,7 +672,21 @@ _hex2int(char const * a, uint32_t len)
       [self printException:exception caption:lastNodeCaption];
     }
   }
-  
+
+  if (dataInCodeEntriesNode)
+  {
+    @try
+    {
+      [self createDataInCodeEntriesNode:dataInCodeEntriesNode
+                                caption:(lastNodeCaption = @"Dices")
+                               location:dataInCodeEntriesNode.dataRange.location
+                                 length:dataInCodeEntriesNode.dataRange.length];
+    }
+    @catch(NSException * exception)
+    {
+      [self printException:exception caption:lastNodeCaption];
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -2511,7 +2536,7 @@ struct CompareSectionByName
     }
     NSLog(@"%@: ObjC Section contents finished parsing.", self);
   }];
-  
+
   NSBlockOperation * codeSectionsOperation = [NSBlockOperation blockOperationWithBlock:^
   {
     if ([backgroundThread isCancelled]) return;

@@ -1999,6 +1999,41 @@ using namespace std;
    MVUnderlineAttributeName,@"YES",nil];
   
 #pragma message "TODO"
+//  void
+//  print_linker_option_command(
+//                              struct linker_option_command *lo,
+//                              struct load_command *lc)
+//  {
+//    int left, len, i;
+//    char *string;
+//    
+//    printf("     cmd LC_LINKER_OPTION\n");
+//    printf(" cmdsize %u", lo->cmdsize);
+//    if(lo->cmdsize < sizeof(struct linker_option_command))
+//	    printf(" Incorrect size\n");
+//    else
+//	    printf("\n");
+//    printf("   count %u\n", lo->count);
+//    string = (char *)lc + sizeof(struct linker_option_command);
+//    left = lo->cmdsize - sizeof(struct linker_option_command);
+//    i = 0;
+//    while(left > 0){
+//	    while(*string == '\0' && left > 0){
+//        string++;
+//        left--;
+//	    }
+//	    if(left > 0){
+//        i++;
+//        printf("  string #%d %.*s\n", i, left, string);
+//        len = strnlen(string, left) + 1;
+//        string += len;
+//        left -= len;
+//	    }
+//    }
+//    if(lo->count != i)
+//      printf("   count %u does not match number of strings %u\n",
+//             lo->count, i);
+//  }
   
   return node;
 }

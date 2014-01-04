@@ -40,7 +40,7 @@ typedef std::map<uint64_t,uint64_t>                             ExceptionFrameMa
   Module64Vector          modules_64;       // module table entries in a dynamic shared library for 64-bit architectures
   char const *            strtab;           // pointer to the string table
   
-  RelocMap                relocMap;         // section relocations
+  //RelocMap                relocMap;         // section relocations
   SegmentInfoMap          segmentInfo;      // segment info lookup table by offset
   SectionInfoMap          sectionInfo;      // section info lookup table by address
   ExceptionFrameMap       lsdaInfo;         // LSDA info lookup table by address
