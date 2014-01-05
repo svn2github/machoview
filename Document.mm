@@ -405,36 +405,27 @@ enum ViewType
 {
   if ([notification object] == dataController)
   {
-    //[dataController.treeLock lock];
-    
-    @try // for some reason sometimes weird exceptions come from NSTreeView
+    dispatch_async(dispatch_get_main_queue(), ^
     {
+      // Update UI here, on the main queue
       NSDictionary * userInfo = [notification userInfo];
       if (userInfo)
       {
         //refresh the modified node only
         MVNode * node = [userInfo objectForKey:MVNodeUserInfoKey];
-      
+          
         [leftView reloadItem:node.parent];
-     
+          
         if ([leftView isItemExpanded:node.parent])
         {
           [leftView reloadItem:node];
         }
       }
-      else 
+      else
       {
-        [leftView reloadItem:dataController.rootNode reloadChildren:YES]; 
+        [leftView reloadItem:dataController.rootNode reloadChildren:YES];
       }
-    }    
-    @catch (NSException * e) 
-    {
-      NSLog(@"***%@", e);
-    }
-    @finally 
-    {
-      //[dataController.treeLock unlock];
-    }
+    });
   }
 }
 
