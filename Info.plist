@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBuildDate</key>
-	<string>Sat Jan  4 23:26:02 CET 2014</string>
+	<string>Sun Jan  5 08:49:37 CET 2014</string>
 	<key>CFBuildNumber</key>
-	<string>8656</string>
+	<string>8666</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDocumentTypes</key>
@@ -44,7 +44,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>8656</string>
+	<string>8666</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>

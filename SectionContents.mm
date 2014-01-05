@@ -606,8 +606,16 @@ static AsmFootPrint const fastStubHelperHelperARM =
   
   if((qflag || gflag) && mach_header->cputype == CPU_TYPE_ARM)
   {
-    ot_arm_dc = create_arm_llvm_disassembler(mach_header->cpusubtype);
-    ot_thumb_dc = create_thumb_llvm_disassembler(mach_header->cpusubtype);
+    @synchronized([self class])
+    {
+      ot_arm_dc = create_arm_llvm_disassembler(mach_header->cpusubtype);
+      NSAssert(ot_arm_dc, @"ARM Disassembler could not be created");
+    }
+    @synchronized([self class])
+    {
+      ot_thumb_dc = create_thumb_llvm_disassembler(mach_header->cpusubtype);
+      NSAssert(ot_arm_dc, @"Thumb Disassembler could not be created");
+    }
     llvm_disasm_set_options(ot_arm_dc,      LLVMDisassembler_Option_PrintImmHex);
     llvm_disasm_set_options(ot_thumb_dc,    LLVMDisassembler_Option_PrintImmHex);
     if(eflag) // print enhanced disassembly
@@ -619,7 +627,11 @@ static AsmFootPrint const fastStubHelperHelperARM =
   
   if((qflag || gflag) && mach_header->cputype == CPU_TYPE_I386)
   {
-    ot_i386_dc = create_i386_llvm_disassembler();
+    @synchronized([self class])
+    {
+      ot_i386_dc = create_i386_llvm_disassembler();
+      NSAssert(ot_arm_dc, @"I386 Disassembler could not be created");
+    }
     llvm_disasm_set_options(ot_i386_dc,     LLVMDisassembler_Option_PrintImmHex);
     if(nflag) // use intel disassembly syntax
       llvm_disasm_set_options(ot_i386_dc,   LLVMDisassembler_Option_AsmPrinterVariant);
@@ -629,7 +641,11 @@ static AsmFootPrint const fastStubHelperHelperARM =
   
   if((qflag || gflag) && mach_header->cputype == CPU_TYPE_X86_64)
   {
-    ot_x86_64_dc = create_x86_64_llvm_disassembler();
+    @synchronized([self class])
+    {
+      ot_x86_64_dc = create_x86_64_llvm_disassembler();
+      NSAssert(ot_arm_dc, @"X86_64 Disassembler could not be created");
+    }
     llvm_disasm_set_options(ot_x86_64_dc,   LLVMDisassembler_Option_PrintImmHex);
     if(nflag) // use intel disassembly syntax
       llvm_disasm_set_options(ot_x86_64_dc, LLVMDisassembler_Option_AsmPrinterVariant);
