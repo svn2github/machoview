@@ -614,7 +614,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
     @synchronized([self class])
     {
       ot_thumb_dc = create_thumb_llvm_disassembler(mach_header->cpusubtype);
-      NSAssert(ot_arm_dc, @"Thumb Disassembler could not be created");
+      NSAssert(ot_thumb_dc, @"Thumb Disassembler could not be created");
     }
     llvm_disasm_set_options(ot_arm_dc,      LLVMDisassembler_Option_PrintImmHex);
     llvm_disasm_set_options(ot_thumb_dc,    LLVMDisassembler_Option_PrintImmHex);
@@ -630,7 +630,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
     @synchronized([self class])
     {
       ot_i386_dc = create_i386_llvm_disassembler();
-      NSAssert(ot_arm_dc, @"I386 Disassembler could not be created");
+      NSAssert(ot_i386_dc, @"I386 Disassembler could not be created");
     }
     llvm_disasm_set_options(ot_i386_dc,     LLVMDisassembler_Option_PrintImmHex);
     if(nflag) // use intel disassembly syntax
@@ -644,7 +644,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
     @synchronized([self class])
     {
       ot_x86_64_dc = create_x86_64_llvm_disassembler();
-      NSAssert(ot_arm_dc, @"X86_64 Disassembler could not be created");
+      NSAssert(ot_x86_64_dc, @"X86_64 Disassembler could not be created");
     }
     llvm_disasm_set_options(ot_x86_64_dc,   LLVMDisassembler_Option_PrintImmHex);
     if(nflag) // use intel disassembly syntax

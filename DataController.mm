@@ -19,6 +19,23 @@ enum {
   MVMetaDataAttributeOrdinal
 };
 
+enum {
+  MVBlackColorOrdinal = 1,
+  MVDarkGrayColorOrdinal,
+  MVLightGrayColorOrdinal,
+  MVWhiteColorOrdinal,
+  MVGrayColorOrdinal,
+  MVRedColorOrdinal,
+  MVGreenColorOrdinal,
+  MVBlueColorOrdinal,
+  MVCyanColorOrdinal,
+  MVYellowColorOrdinal,
+  MVMagentaColorOrdinal,
+  MVOrangeColorOrdinal,
+  MVPurpleColorOrdinal,
+  MVBrownColorOrdinal
+};
+
 NSString * const MVUnderlineAttributeName         = @"MVUnderlineAttribute";
 NSString * const MVCellColorAttributeName         = @"MVCellColorAttribute";
 NSString * const MVTextColorAttributeName         = @"MVTextColorAttribute";
@@ -167,18 +184,57 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 //-----------------------------------------------------------------------------
 - (void)writeColor:(NSColor *)color toFile:(FILE *)pFile
 {
-  CGFloat red, green, blue, alpha;
-  [color getRed:&red green:&green blue:&blue alpha:&alpha];
-  float fred = red, fgreen = green, fblue = blue, falpha = alpha;
-  fwrite(&fred, sizeof(float), 1, pFile);
-  fwrite(&fgreen, sizeof(float), 1, pFile);
-  fwrite(&fblue, sizeof(float), 1, pFile);
-  fwrite(&falpha, sizeof(float), 1, pFile);
+  int colorOrdinal = [color isEqualTo:[NSColor blackColor]]     ? MVBlackColorOrdinal
+                   : [color isEqualTo:[NSColor darkGrayColor]]  ? MVDarkGrayColorOrdinal
+                   : [color isEqualTo:[NSColor lightGrayColor]] ? MVLightGrayColorOrdinal
+                   : [color isEqualTo:[NSColor whiteColor]]     ? MVWhiteColorOrdinal
+                   : [color isEqualTo:[NSColor grayColor]]      ? MVGrayColorOrdinal
+                   : [color isEqualTo:[NSColor redColor]]       ? MVRedColorOrdinal
+                   : [color isEqualTo:[NSColor greenColor]]     ? MVGreenColorOrdinal
+                   : [color isEqualTo:[NSColor blueColor]]      ? MVBlueColorOrdinal
+                   : [color isEqualTo:[NSColor cyanColor]]      ? MVCyanColorOrdinal
+                   : [color isEqualTo:[NSColor yellowColor]]    ? MVYellowColorOrdinal
+                   : [color isEqualTo:[NSColor magentaColor]]   ? MVMagentaColorOrdinal
+                   : [color isEqualTo:[NSColor orangeColor]]    ? MVOrangeColorOrdinal
+                   : [color isEqualTo:[NSColor purpleColor]]    ? MVPurpleColorOrdinal
+                   : [color isEqualTo:[NSColor brownColor]]     ? MVBrownColorOrdinal
+                   : 0;
+  
+  putc(colorOrdinal, pFile);
+  if (colorOrdinal == 0)
+  {
+    CGFloat red, green, blue, alpha;
+    [color getRed:&red green:&green blue:&blue alpha:&alpha];
+    float fred = red, fgreen = green, fblue = blue, falpha = alpha;
+    fwrite(&fred, sizeof(float), 1, pFile);
+    fwrite(&fgreen, sizeof(float), 1, pFile);
+    fwrite(&fblue, sizeof(float), 1, pFile);
+    fwrite(&falpha, sizeof(float), 1, pFile);
+  }
 }
 
 //-----------------------------------------------------------------------------
 - (NSColor *)readColorFromFile:(FILE *)pFile
 {
+  int colorOrdinal = getc(pFile);
+  switch (colorOrdinal)
+  {
+    case MVBlackColorOrdinal:     return [NSColor blackColor];
+    case MVDarkGrayColorOrdinal:  return [NSColor darkGrayColor];
+    case MVLightGrayColorOrdinal: return [NSColor greenColor];
+    case MVWhiteColorOrdinal:     return [NSColor lightGrayColor];
+    case MVGrayColorOrdinal:      return [NSColor whiteColor];
+    case MVRedColorOrdinal:       return [NSColor grayColor];
+    case MVGreenColorOrdinal:     return [NSColor redColor];
+    case MVBlueColorOrdinal:      return [NSColor greenColor];
+    case MVCyanColorOrdinal:      return [NSColor cyanColor];
+    case MVYellowColorOrdinal:    return [NSColor yellowColor];
+    case MVMagentaColorOrdinal:   return [NSColor magentaColor];
+    case MVOrangeColorOrdinal:    return [NSColor orangeColor];
+    case MVPurpleColorOrdinal:    return [NSColor purpleColor];
+    case MVBrownColorOrdinal:     return [NSColor brownColor];
+  }
+
   float fred, fgreen, fblue, falpha;
   fread(&fred, sizeof(float), 1, pFile);
   fread(&fgreen, sizeof(float), 1, pFile);

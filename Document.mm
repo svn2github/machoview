@@ -413,9 +413,10 @@ enum ViewType
       {
         //refresh the modified node only
         MVNode * node = [userInfo objectForKey:MVNodeUserInfoKey];
-          
+      
+#pragma message "TODO: check if window still exists"
         [leftView reloadItem:node.parent];
-          
+        
         if ([leftView isItemExpanded:node.parent])
         {
           [leftView reloadItem:node];
