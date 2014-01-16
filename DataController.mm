@@ -901,7 +901,6 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
   NSParameterAssert(detailsOffset != 0);
   fseek (pFile, detailsOffset, SEEK_SET);
   [details loadIndexes];
-    
   [layout.dataController updateStatus:MVStatusTaskTerminated];
 }
 
@@ -1325,17 +1324,23 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
       [pipeCondition unlock];
     }
     
+    if ([saverThread isCancelled])
+    {
+      // only exit if buffer is surely empty
+      if ([objectsToSave count] == 0)
+      {
+        break; // the nicest way
+        //return;
+        //[NSThread exit];
+      }
+      // do not wait for new rows if the saver has benn cancelled
+      // just flush out the existing ones
+      continue;
+    }
+    
+    // let's wait for some objects to collect for saving
     double rnd = 1. + rand()/((double)RAND_MAX+1); // between 1 and 2
     [NSThread sleepForTimeInterval:rnd];
-    
-    // only exit if buffer is surely empty
-    // (we waited for a second if anyone put in objects to save before terminate)
-    if ([saverThread isCancelled] && [objectsToSave count] == 0)
-    {
-      break; // the nicest way
-      //return;
-      //[NSThread exit];
-    }
   }
 }
 

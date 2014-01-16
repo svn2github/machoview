@@ -413,8 +413,13 @@ enum ViewType
       {
         //refresh the modified node only
         MVNode * node = [userInfo objectForKey:MVNodeUserInfoKey];
-      
-#pragma message "TODO: check if window still exists"
+        
+        // check if the window still exists which contains the leftView to update
+        if ([[self windowControllers] count] == 0)
+        {
+          return;
+        }
+        
         [leftView reloadItem:node.parent];
         
         if ([leftView isItemExpanded:node.parent])
