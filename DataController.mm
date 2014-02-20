@@ -221,12 +221,12 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
   {
     case MVBlackColorOrdinal:     return [NSColor blackColor];
     case MVDarkGrayColorOrdinal:  return [NSColor darkGrayColor];
-    case MVLightGrayColorOrdinal: return [NSColor greenColor];
-    case MVWhiteColorOrdinal:     return [NSColor lightGrayColor];
-    case MVGrayColorOrdinal:      return [NSColor whiteColor];
-    case MVRedColorOrdinal:       return [NSColor grayColor];
-    case MVGreenColorOrdinal:     return [NSColor redColor];
-    case MVBlueColorOrdinal:      return [NSColor greenColor];
+    case MVLightGrayColorOrdinal: return [NSColor lightGrayColor];
+    case MVWhiteColorOrdinal:     return [NSColor whiteColor];
+    case MVGrayColorOrdinal:      return [NSColor grayColor];
+    case MVRedColorOrdinal:       return [NSColor redColor];
+    case MVGreenColorOrdinal:     return [NSColor greenColor];
+    case MVBlueColorOrdinal:      return [NSColor blueColor];
     case MVCyanColorOrdinal:      return [NSColor cyanColor];
     case MVYellowColorOrdinal:    return [NSColor yellowColor];
     case MVMagentaColorOrdinal:   return [NSColor magentaColor];
