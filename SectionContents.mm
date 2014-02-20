@@ -868,7 +868,7 @@ static AsmFootPrint const fastStubHelperHelperARM =
       
       // read from pipe
       char buf[0x1000], *pbuf = buf;
-      ssize_t lenbuf = read(pfdout[0], buf, sizeof(buf));
+      ssize_t lenbuf = read(pfdout[0], buf, sizeof(buf)-1);
       buf[lenbuf] = '\0'; // terminate buffer
       size_t field_start_pos = 0; // start position in buffer of the current field
       
