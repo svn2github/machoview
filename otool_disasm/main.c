@@ -8,9 +8,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mach-o/reloc.h>
 #include "stuff/bool.h"
+#include "stuff/allocate.h"
 #include "stuff/symbol.h"
+#include "stuff/bytesex.h"
+#include "stuff/guess_short_name.h"
+#include "dyld_bind_info.h"
 
 /* Name of this program for error messages (argv[0]) */
 char *progname = NULL;
@@ -18,12 +23,11 @@ char *progname = NULL;
 /*
  * The flags to indicate the actions to perform.
  */
-enum bool eflag = FALSE; /* print enhanced disassembly */
+enum bool gflag = FALSE; /* group the disassembly */
 enum bool Xflag = FALSE; /* don't print leading address in disassembly */
 enum bool Bflag = FALSE; /* force Thumb disassembly (ARM objects only) */
-enum bool qflag = FALSE; /* use 'C' Public llvm-mc disassembler */
-enum bool gflag = FALSE; /* group the disassembly */
-enum bool nflag = FALSE; /* use intel disassembly syntax */
+enum bool qflag = TRUE; /* use 'C' Public llvm-mc disassembler */
+enum bool jflag = FALSE; /* print opcode bytes */
 char *mcpu = "";	/* the arg of the -mcpu=arg flag */
 
 /*
@@ -73,3 +77,4 @@ rel_compare(
 	else
     return(1);
 }
+
