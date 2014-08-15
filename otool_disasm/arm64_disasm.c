@@ -859,6 +859,7 @@ LLVMDisasmContextRef dc)
 	dis_info.addr = addr;
 	dis_info.sect_addr = sect_addr;
 	dis_info.demangled_name = NULL;
+  dis_info.method = NULL;
 
 	dst[4095] = '\0';
 	if(llvm_disasm_instruction(dc, (uint8_t *)sect, 4, addr, dst, 4095) != 0)
