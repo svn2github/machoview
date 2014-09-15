@@ -14,9 +14,7 @@
 
 -(id)init
 {
-  if (![super initWithWindowNibName:@"Preferences"])
-    return nil;
-  
+  self = [super initWithWindowNibName:@"Preferences"];
   return self;
 }
 
