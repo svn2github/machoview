@@ -21,10 +21,10 @@ typedef std::vector<struct dylib_module_64 const *>       Module64Vector;
 typedef std::vector<struct data_in_code_entry const *>    DataInCodeEntryVector;
 typedef std::vector<uint32_t const *>                     IndirectSymbolVector;
 
-typedef std::map<uint32_t,std::pair<uint32_t,uint64_t> >        RelocMap;           // fileOffset --> <length,value>
-typedef std::map<uint32_t,std::pair<uint64_t,uint64_t> >        SegmentInfoMap;     // fileOffset --> <address,size>
-typedef std::map<uint64_t,std::pair<uint32_t,NSDictionary *> >  SectionInfoMap;     // address    --> <fileOffset,sectionUserInfo>
-typedef std::map<uint64_t,uint64_t>                             ExceptionFrameMap;  // LSDA_addr  --> PCBegin_addr
+typedef std::map<uint32_t,std::pair<uint32_t,uint64_t> >  RelocMap;                     // fileOffset --> <length,value>
+typedef std::map<uint32_t,std::pair<uint64_t,uint64_t> >  SegmentInfoMap;               // fileOffset --> <address,size>
+typedef std::map<uint64_t,std::pair<uint32_t,NSDictionary * __weak> >  SectionInfoMap;  // address    --> <fileOffset,sectionUserInfo>
+typedef std::map<uint64_t,uint64_t>                       ExceptionFrameMap;            // LSDA_addr  --> PCBegin_addr
 
 @interface MachOLayout : MVLayout 
 {

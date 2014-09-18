@@ -332,7 +332,7 @@ enum ViewType
     threadCount = 0;
     
     NSNotificationCenter * nc = [NSNotificationCenter defaultCenter];
-    __weak MVDocument * weakSelf = self;
+    typeof(self) __weak weakSelf = self;
     
     /*
     [nc addObserver:weakSelf

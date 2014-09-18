@@ -109,7 +109,7 @@ using namespace std;
   
   while (NSMaxRange(range) < location + length && isDone == NO)
   {
-    uint8_t byte = [self read_int8:range lastReadHex:&lastReadHex];
+    uint8_t byte = [dataController read_int8:range lastReadHex:&lastReadHex];
     uint8_t opcode = byte & REBASE_OPCODE_MASK;
     uint8_t immediate = byte & REBASE_IMMEDIATE_MASK;
     
@@ -158,7 +158,7 @@ using namespace std;
                                :@"REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB"
                                :[NSString stringWithFormat:@"segment (%u)", segmentIndex]];
          
-        uint64_t offset = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t offset = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
@@ -183,7 +183,7 @@ using namespace std;
                                :@"REBASE_OPCODE_ADD_ADDR_ULEB"
                                :@""];
          
-        uint64_t offset = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t offset = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
@@ -235,7 +235,7 @@ using namespace std;
         
         uint32_t startNextRebase = NSMaxRange(range);
         
-        uint64_t count = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t count = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
@@ -262,7 +262,7 @@ using namespace std;
         
         uint32_t startNextRebase = NSMaxRange(range);
         
-        uint64_t offset = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t offset = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
@@ -286,13 +286,13 @@ using namespace std;
         
         uint32_t startNextRebase = NSMaxRange(range);
         
-        uint64_t count = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t count = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
                                :[NSString stringWithFormat:@"count (%qu)",count]];
 
-        uint64_t skip = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t skip = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
@@ -453,7 +453,7 @@ using namespace std;
   
   while (NSMaxRange(range) < location + length && isDone == NO)
   {
-    uint8_t byte = [self read_int8:range lastReadHex:&lastReadHex];
+    uint8_t byte = [dataController read_int8:range lastReadHex:&lastReadHex];
     uint8_t opcode = byte & BIND_OPCODE_MASK;
     uint8_t immediate = byte & BIND_IMMEDIATE_MASK;
     
@@ -489,7 +489,7 @@ using namespace std;
                                :@"BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB"
                                :@""];
         
-        libOrdinal = [self read_uleb128:range lastReadHex:&lastReadHex];
+        libOrdinal = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
@@ -523,7 +523,7 @@ using namespace std;
                                :@"BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM"
                                :[NSString stringWithFormat:@"flags (%u)",((uint32_t)-1 & symbolFlags)]];
         
-        symbolName = [self read_string:range lastReadHex:&lastReadHex];
+        symbolName = [dataController read_string:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"string"
@@ -547,7 +547,7 @@ using namespace std;
                                :@"BIND_OPCODE_SET_ADDEND_SLEB"
                                :@""];
         
-        addend = [self read_sleb128:range lastReadHex:&lastReadHex];
+        addend = [dataController read_sleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"sleb128"
@@ -563,7 +563,7 @@ using namespace std;
                                :@"BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB"
                                :[NSString stringWithFormat:@"segment (%u)",segmentIndex]];
         
-        uint64_t val = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t val = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
@@ -588,7 +588,7 @@ using namespace std;
                                :@"BIND_OPCODE_ADD_ADDR_ULEB"
                                :@""];
         
-        uint64_t val = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t val = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
@@ -633,7 +633,7 @@ using namespace std;
 
         uint32_t startNextBind = NSMaxRange(range);
         
-        uint64_t val = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t val = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
@@ -695,13 +695,13 @@ using namespace std;
         
         uint32_t startNextBind = NSMaxRange(range);
         
-        uint64_t count = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t count = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
                                :[NSString stringWithFormat:@"count (%qu)",count]];
         
-        uint64_t skip = [self read_uleb128:range lastReadHex:&lastReadHex];
+        uint64_t skip = [dataController read_uleb128:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                                :lastReadHex
                                :@"uleb128"
@@ -792,7 +792,7 @@ using namespace std;
   NSRange range = NSMakeRange(location + skip,0);
   NSString * lastReadHex;
 
-  uint8_t terminalSize = [self read_uint8:range lastReadHex:&lastReadHex];
+  uint8_t terminalSize = [dataController read_uint8:range lastReadHex:&lastReadHex];
   [node.details insertRowWithOffset:range.location
                                    :[NSString stringWithFormat:@"%.8lX", range.location]
                                    :lastReadHex
@@ -803,7 +803,7 @@ using namespace std;
   {
     uint32_t terminalLocation = NSMaxRange(range);
     
-    uint64_t flags = [self read_uleb128:range lastReadHex:&lastReadHex];
+    uint64_t flags = [dataController read_uleb128:range lastReadHex:&lastReadHex];
     [node.details insertRowWithOffset:range.location
                                      :[NSString stringWithFormat:@"%.8lX", range.location]
                                      :lastReadHex
@@ -816,7 +816,7 @@ using namespace std;
     if (flags & EXPORT_SYMBOL_FLAGS_REEXPORT)                                             [node.details insertRowWithOffset:range.location:@"":@"":@"08":@"EXPORT_SYMBOL_FLAGS_REEXPORT"];
     if (flags & EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER)                                    [node.details insertRowWithOffset:range.location:@"":@"":@"10":@"EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER"];
     
-    uint64_t offset = [self read_uleb128:range lastReadHex:&lastReadHex];
+    uint64_t offset = [dataController read_uleb128:range lastReadHex:&lastReadHex];
     [node.details insertRowWithOffset:range.location
                                      :[NSString stringWithFormat:@"%.8lX", range.location]
                                      :lastReadHex
@@ -834,7 +834,7 @@ using namespace std;
     range = NSMakeRange(terminalLocation, terminalSize);
   }
   
-  uint8_t childCount = [self read_uint8:range lastReadHex:&lastReadHex];
+  uint8_t childCount = [dataController read_uint8:range lastReadHex:&lastReadHex];
   [node.details insertRowWithOffset:range.location
                                    :[NSString stringWithFormat:@"%.8lX", range.location]
                                    :lastReadHex
@@ -851,14 +851,14 @@ using namespace std;
   {
     exportLocation = NSMaxRange(range);
     
-    NSString * label = [self read_string:range lastReadHex:&lastReadHex];
+    NSString * label = [dataController read_string:range lastReadHex:&lastReadHex];
     [node.details insertRowWithOffset:range.location
                                      :[NSString stringWithFormat:@"%.8lX", range.location]
                                      :lastReadHex
                                      :@"Node Label"
                                      :[NSString stringWithFormat:@"\"%@\"",label]];
      
-    uint64_t skip = [self read_uleb128:range lastReadHex:&lastReadHex];
+    uint64_t skip = [dataController read_uleb128:range lastReadHex:&lastReadHex];
     [node.details insertRowWithOffset:range.location
                                      :[NSString stringWithFormat:@"%.8lX", range.location]
                                      :lastReadHex
