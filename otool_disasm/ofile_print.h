@@ -340,23 +340,26 @@ extern void print_cstring_section(
     enum bool print_addresses);
 
 extern void print_literal4_section(
+    cpu_type_t cputype,
     char *sect,
     uint32_t sect_size,
-    uint32_t sect_addr,
+    uint64_t sect_addr,
     enum byte_sex literal_byte_sex,
     enum bool print_addresses);
 
 extern void print_literal8_section(
+    cpu_type_t cputype,
     char *sect,
     uint32_t sect_size,
-    uint32_t sect_addr,
+    uint64_t sect_addr,
     enum byte_sex literal_byte_sex,
     enum bool print_addresses);
 
 extern void print_literal16_section(
+    cpu_type_t cputype,
     char *sect,
     uint32_t sect_size,
-    uint32_t sect_addr,
+    uint64_t sect_addr,
     enum byte_sex literal_byte_sex,
     enum bool print_addresses);
 
@@ -548,6 +551,12 @@ extern void print_objc_runtime_setup_section(
     uint32_t object_size,
     enum bool verbose);
 
+extern void print_bitcode_section(
+    char *sect,
+    uint64_t sect_size,
+    enum bool verbose,
+    enum bool print_xar_header);
+
 extern char *get_objc2_64bit_cfstring_name(
     uint64_t p,
     struct load_command *load_commands,
@@ -555,16 +564,41 @@ extern char *get_objc2_64bit_cfstring_name(
     uint32_t sizeofcmds,
     enum byte_sex object_byte_sex,
     char *object_addr,
-    uint32_t object_size);
+    uint32_t object_size,
+    struct nlist_64 *symbols64,
+    uint32_t nsymbols,
+    char *strings,
+    uint32_t strings_size,
+    cpu_type_t cputype);
 
 extern char *get_objc2_64bit_class_name(
     uint64_t p,
+    uint64_t address_of_p,
     struct load_command *load_commands,
     uint32_t ncmds,
     uint32_t sizeofcmds,
     enum byte_sex object_byte_sex,
     char *object_addr,
-    uint32_t object_size);
+    uint32_t object_size,
+    struct nlist_64 *symbols64,
+    uint32_t nsymbols, 
+    char *strings,          
+    uint32_t strings_size,  
+    cpu_type_t cputype);
+
+extern uint64_t get_objc2_64bit_selref(
+    uint64_t address_of_p,
+    struct load_command *load_commands,
+    uint32_t ncmds,
+    uint32_t sizeofcmds,
+    enum byte_sex object_byte_sex,
+    char *object_addr,
+    uint32_t object_size,
+    struct nlist_64 *symbols64,
+    uint32_t nsymbols,
+    char *strings,
+    uint32_t strings_size,
+    cpu_type_t cputype);
 
 extern void print_coff_reloc_section(
     struct load_command *load_commands,

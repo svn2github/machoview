@@ -1,3 +1,11 @@
+//
+//
+//  some must have defines from the original main.c
+//
+//
+//
+//
+
 /*
  * Copyright © 2009 Apple Inc. All rights reserved.
  *
@@ -45,31 +53,31 @@
  */
 const char *
 guess_symbol(
-             const uint64_t value,	/* the value of this symbol (in) */
-             const struct symbol *sorted_symbols,
-             const uint32_t nsorted_symbols,
-             const enum bool verbose)
+const uint64_t value,	/* the value of this symbol (in) */
+const struct symbol *sorted_symbols,
+const uint32_t nsorted_symbols,
+const enum bool verbose)
 {
-  int32_t high, low, mid;
-  
+    int32_t high, low, mid;
+
 	if(verbose == FALSE)
-    return(NULL);
-  
+	    return(NULL);
+
 	low = 0;
 	high = nsorted_symbols - 1;
 	mid = (high - low) / 2;
 	while(high >= low){
-    if(sorted_symbols[mid].n_value == value){
-      return(sorted_symbols[mid].name);
-    }
-    if(sorted_symbols[mid].n_value > value){
-      high = mid - 1;
-      mid = (high + low) / 2;
-    }
-    else{
-      low = mid + 1;
-      mid = (high + low) / 2;
-    }
+	    if(sorted_symbols[mid].n_value == value){
+		return(sorted_symbols[mid].name);
+	    }
+	    if(sorted_symbols[mid].n_value > value){
+		high = mid - 1;
+		mid = (high + low) / 2;
+	    }
+	    else{
+		low = mid + 1;
+		mid = (high + low) / 2;
+	    }
 	}
 	return(NULL);
 }
@@ -80,126 +88,126 @@ guess_symbol(
  */
 const char *
 guess_indirect_symbol(
-                      const uint64_t value,	/* the value of this symbol (in) */
-                      const uint32_t ncmds,
-                      const uint32_t sizeofcmds,
-                      const struct load_command *load_commands,
-                      const enum byte_sex load_commands_byte_sex,
-                      const uint32_t *indirect_symbols,
-                      const uint32_t nindirect_symbols,
-                      const struct nlist *symbols,
-                      const struct nlist_64 *symbols64,
-                      const uint32_t nsymbols,
-                      const char *strings,
-                      const uint32_t strings_size)
+const uint64_t value,	/* the value of this symbol (in) */
+const uint32_t ncmds,
+const uint32_t sizeofcmds,
+const struct load_command *load_commands,
+const enum byte_sex load_commands_byte_sex,
+const uint32_t *indirect_symbols,
+const uint32_t nindirect_symbols,
+const struct nlist *symbols,
+const struct nlist_64 *symbols64,
+const uint32_t nsymbols,
+const char *strings,
+const uint32_t strings_size)
 {
-  enum byte_sex host_byte_sex;
-  enum bool swapped;
-  uint32_t i, j, section_type, index, stride;
-  const struct load_command *lc;
-  struct load_command l;
-  struct segment_command sg;
-  struct section s;
-  struct segment_command_64 sg64;
-  struct section_64 s64;
-  char *p;
-  uint64_t big_load_end;
-  
+    enum byte_sex host_byte_sex;
+    enum bool swapped;
+    uint32_t i, j, section_type, index, stride;
+    const struct load_command *lc;
+    struct load_command l;
+    struct segment_command sg;
+    struct section s;
+    struct segment_command_64 sg64;
+    struct section_64 s64;
+    char *p;
+    uint64_t big_load_end;
+
 	host_byte_sex = get_host_byte_sex();
 	swapped = host_byte_sex != load_commands_byte_sex;
-  
+
 	lc = load_commands;
 	big_load_end = 0;
 	for(i = 0 ; i < ncmds; i++){
-    memcpy((char *)&l, (char *)lc, sizeof(struct load_command));
-    if(swapped)
-      swap_load_command(&l, host_byte_sex);
-    if(l.cmdsize % sizeof(int32_t) != 0)
-      return(NULL);
-    big_load_end += l.cmdsize;
-    if(big_load_end > sizeofcmds)
-      return(NULL);
-    switch(l.cmd){
+	    memcpy((char *)&l, (char *)lc, sizeof(struct load_command));
+	    if(swapped)
+		swap_load_command(&l, host_byte_sex);
+	    if(l.cmdsize % sizeof(int32_t) != 0)
+		return(NULL);
+	    big_load_end += l.cmdsize;
+	    if(big_load_end > sizeofcmds)
+		return(NULL);
+	    switch(l.cmd){
 	    case LC_SEGMENT:
-        memcpy((char *)&sg, (char *)lc, sizeof(struct segment_command));
-        if(swapped)
-          swap_segment_command(&sg, host_byte_sex);
-        p = (char *)lc + sizeof(struct segment_command);
-        for(j = 0 ; j < sg.nsects ; j++){
-          memcpy((char *)&s, p, sizeof(struct section));
-          p += sizeof(struct section);
-          if(swapped)
-            swap_section(&s, 1, host_byte_sex);
-          section_type = s.flags & SECTION_TYPE;
-          if((section_type == S_NON_LAZY_SYMBOL_POINTERS ||
-              section_type == S_LAZY_SYMBOL_POINTERS ||
-              section_type == S_LAZY_DYLIB_SYMBOL_POINTERS ||
-              section_type == S_THREAD_LOCAL_VARIABLE_POINTERS ||
-              section_type == S_SYMBOL_STUBS) &&
-             value >= s.addr && value < s.addr + s.size){
-            if(section_type == S_SYMBOL_STUBS)
-              stride = s.reserved2;
-            else
-              stride = 4;
+		memcpy((char *)&sg, (char *)lc, sizeof(struct segment_command));
+		if(swapped)
+		    swap_segment_command(&sg, host_byte_sex);
+		p = (char *)lc + sizeof(struct segment_command);
+		for(j = 0 ; j < sg.nsects ; j++){
+		    memcpy((char *)&s, p, sizeof(struct section));
+		    p += sizeof(struct section);
+		    if(swapped)
+			swap_section(&s, 1, host_byte_sex);
+		    section_type = s.flags & SECTION_TYPE;
+		    if((section_type == S_NON_LAZY_SYMBOL_POINTERS ||
+		        section_type == S_LAZY_SYMBOL_POINTERS ||
+		        section_type == S_LAZY_DYLIB_SYMBOL_POINTERS ||
+		        section_type == S_THREAD_LOCAL_VARIABLE_POINTERS ||
+		        section_type == S_SYMBOL_STUBS) &&
+		        value >= s.addr && value < s.addr + s.size){
+			if(section_type == S_SYMBOL_STUBS)
+			    stride = s.reserved2;
+			else
+			    stride = 4;
 			if(stride == 0)
 			    return(NULL);
-            index = s.reserved1 + (value - s.addr) / stride;
-            if(index < nindirect_symbols &&
-               symbols != NULL && strings != NULL &&
+			index = s.reserved1 + (value - s.addr) / stride;
+			if(index < nindirect_symbols &&
+		    	   symbols != NULL && strings != NULL &&
 		           indirect_symbols[index] < nsymbols &&
 		           (uint32_t)symbols[indirect_symbols[index]].
-               n_un.n_strx < strings_size)
-              return(strings +
-                     symbols[indirect_symbols[index]].n_un.n_strx);
-            else
-              return(NULL);
-          }
-        }
-        break;
+				n_un.n_strx < strings_size)
+			    return(strings +
+				symbols[indirect_symbols[index]].n_un.n_strx);
+			else
+			    return(NULL);
+		    }
+		}
+		break;
 	    case LC_SEGMENT_64:
-        memcpy((char *)&sg64, (char *)lc,
-               sizeof(struct segment_command_64));
-        if(swapped)
-          swap_segment_command_64(&sg64, host_byte_sex);
-        p = (char *)lc + sizeof(struct segment_command_64);
-        for(j = 0 ; j < sg64.nsects ; j++){
-          memcpy((char *)&s64, p, sizeof(struct section_64));
-          p += sizeof(struct section_64);
-          if(swapped)
-            swap_section_64(&s64, 1, host_byte_sex);
-          section_type = s64.flags & SECTION_TYPE;
-          if((section_type == S_NON_LAZY_SYMBOL_POINTERS ||
-              section_type == S_LAZY_SYMBOL_POINTERS ||
-              section_type == S_LAZY_DYLIB_SYMBOL_POINTERS ||
-              section_type == S_THREAD_LOCAL_VARIABLE_POINTERS ||
-              section_type == S_SYMBOL_STUBS) &&
-             value >= s64.addr && value < s64.addr + s64.size){
-            if(section_type == S_SYMBOL_STUBS)
-              stride = s64.reserved2;
-            else
-              stride = 8;
+		memcpy((char *)&sg64, (char *)lc,
+		       sizeof(struct segment_command_64));
+		if(swapped)
+		    swap_segment_command_64(&sg64, host_byte_sex);
+		p = (char *)lc + sizeof(struct segment_command_64);
+		for(j = 0 ; j < sg64.nsects ; j++){
+		    memcpy((char *)&s64, p, sizeof(struct section_64));
+		    p += sizeof(struct section_64);
+		    if(swapped)
+			swap_section_64(&s64, 1, host_byte_sex);
+		    section_type = s64.flags & SECTION_TYPE;
+		    if((section_type == S_NON_LAZY_SYMBOL_POINTERS ||
+		        section_type == S_LAZY_SYMBOL_POINTERS ||
+		        section_type == S_LAZY_DYLIB_SYMBOL_POINTERS ||
+	   		section_type == S_THREAD_LOCAL_VARIABLE_POINTERS ||
+		        section_type == S_SYMBOL_STUBS) &&
+		        value >= s64.addr && value < s64.addr + s64.size){
+			if(section_type == S_SYMBOL_STUBS)
+			    stride = s64.reserved2;
+			else
+			    stride = 8;
 			if(stride == 0)
 			    return(NULL);
-            index = s64.reserved1 + (value - s64.addr) / stride;
-            if(index < nindirect_symbols &&
-               symbols64 != NULL && strings != NULL &&
+			index = s64.reserved1 + (value - s64.addr) / stride;
+			if(index < nindirect_symbols &&
+		    	   symbols64 != NULL && strings != NULL &&
 		           indirect_symbols[index] < nsymbols &&
 		           (uint32_t)symbols64[indirect_symbols[index]].
-               n_un.n_strx < strings_size)
-              return(strings +
-                     symbols64[indirect_symbols[index]].n_un.n_strx);
-            else
-              return(NULL);
-          }
-        }
-        break;
-    }
-    if(l.cmdsize == 0){
-      return(NULL);
-    }
-    lc = (struct load_command *)((char *)lc + l.cmdsize);
-    if((char *)lc > (char *)load_commands + sizeofcmds)
-      return(NULL);
+				n_un.n_strx < strings_size)
+			    return(strings +
+				symbols64[indirect_symbols[index]].n_un.n_strx);
+			else
+			    return(NULL);
+		    }
+		}
+		break;
+	    }
+	    if(l.cmdsize == 0){
+		return(NULL);
+	    }
+	    lc = (struct load_command *)((char *)lc + l.cmdsize);
+	    if((char *)lc > (char *)load_commands + sizeofcmds)
+		return(NULL);
 	}
 	return(NULL);
 }

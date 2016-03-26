@@ -173,7 +173,7 @@ int64_t nrow_loaded; // number of loaded rows
   [openPanel setCanChooseDirectories:NO];
   [openPanel setCanChooseFiles:YES];
   [openPanel setDelegate:self]; // for filtering files in open panel with shouldShowFilename
-  [openPanel beginSheetModalForWindow:nil 
+  [openPanel beginSheetModalForWindow:nil
    completionHandler:^(NSInteger result) 
    {
      if (result != NSOKButton) 
@@ -325,7 +325,7 @@ int64_t nrow_loaded; // number of loaded rows
   __autoreleasing NSError *error;
 
   NSDocumentController * documentController = [NSDocumentController sharedDocumentController];
-  MVDocument * document = [documentController openDocumentWithContentsOfURL:[NSURL fileURLWithPath:filename] 
+  MVDocument * document = [documentController openDocumentWithContentsOfURL:[NSURL fileURLWithPath:filename]
                                                                     display:YES 
                                                                       error:&error];
 

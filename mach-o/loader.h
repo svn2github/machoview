@@ -207,6 +207,9 @@ struct mach_header_64 {
 					   require it. Only used in MH_EXECUTE
 					   filetypes. */
 
+#define MH_APP_EXTENSION_SAFE 0x02000000 /* The code was linked for use in an
+					    application extension. */
+
 /*
  * The load commands directly follow the mach_header.  The total size of all
  * of the commands is given by the sizeofcmds field in the mach_header.  All
@@ -297,7 +300,7 @@ struct load_command {
 #define	LC_ENCRYPTION_INFO_64 0x2C /* 64-bit encrypted segment information */
 #define LC_LINKER_OPTION 0x2D /* linker options in MH_OBJECT files */
 #define LC_LINKER_OPTIMIZATION_HINT 0x2E /* optimization hints in MH_OBJECT files */
-
+#define LC_VERSION_MIN_WATCHOS 0x30 /* build for Watch min OS version */
 
 /*
  * A variable length string in a load command is represented by an lc_str
@@ -1199,7 +1202,8 @@ struct encryption_info_command_64 {
  */
 struct version_min_command {
     uint32_t	cmd;		/* LC_VERSION_MIN_MACOSX or
-				   LC_VERSION_MIN_IPHONEOS  */
+				   LC_VERSION_MIN_IPHONEOS
+				   LC_VERSION_MIN_WATCHOS */
     uint32_t	cmdsize;	/* sizeof(struct min_version_command) */
     uint32_t	version;	/* X.Y.Z is encoded in nibbles xxxx.yy.zz */
     uint32_t	sdk;		/* X.Y.Z is encoded in nibbles xxxx.yy.zz */
@@ -1299,10 +1303,10 @@ struct dyld_info_command {
      * a uleb128 encoded library ordinal, then a zero terminated
      * UTF8 string.  If the string is zero length, then the symbol
      * is re-export from the specified dylib with the same name.
-     * If the flags is EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER, then following
-     * the flags is two uleb128s: the stub offset and the resolver offset.
-     * The stub is used by non-lazy pointers.  The resolver is used
-     * by lazy pointers and must be called to get the actual address to use.
+	 * If the flags is EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER, then following
+	 * the flags is two uleb128s: the stub offset and the resolver offset.
+	 * The stub is used by non-lazy pointers.  The resolver is used
+	 * by lazy pointers and must be called to get the actual address to use.
      *
      * After the optional exported symbol information is a byte of
      * how many edges (0-255) that this node has leaving it, 

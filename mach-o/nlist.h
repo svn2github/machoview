@@ -78,7 +78,7 @@ struct nlist {
 #ifndef __LP64__
 		char *n_name;	/* for use when in-core */
 #endif
-		uint32_t n_strx;/* index into the string table */
+		uint32_t n_strx;	/* index into the string table */
 	} n_un;
 	uint8_t n_type;		/* type flag, see below */
 	uint8_t n_sect;		/* section number or NO_SECT */
@@ -295,6 +295,12 @@ struct nlist_64 {
  * This bit is only available in .o files (MH_OBJECT filetype)
  */
 #define N_SYMBOL_RESOLVER  0x0100 
+
+/*
+ * The N_ALT_ENTRY bit of the n_desc field indicates that the
+ * symbol is pinned to the previous content.
+ */
+#define N_ALT_ENTRY 0x0200
 
 #ifndef __STRICT_BSD__
 #ifdef __cplusplus
